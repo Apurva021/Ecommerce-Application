@@ -1,5 +1,7 @@
 package com.apurva.gatewayservicev1;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,8 +48,8 @@ public class GatewayController {
 	}
 	
 	@GetMapping("/login")
-	public String loginPage() {
-		return "Login Page";
+	public String loginPage(HttpServletRequest request) {
+		return "Login Page " + jwtUtil.getFullName(request.getHeader("Authorization").substring(7));
 	}
 	
 	@PostMapping("/authenticate")
@@ -65,8 +67,9 @@ public class GatewayController {
 		UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getUsernameString());
 		
 		Integer idInteger = userRepository.findByEmailString(authenticationRequest.getUsernameString()).getUserIdInteger();
+		User user = userRepository.findByEmailString(authenticationRequest.getUsernameString());
 		
-		String jwtString = jwtUtil.generateToken(userDetails, Integer.toString(idInteger));
+		String jwtString = jwtUtil.generateToken(userDetails, Integer.toString(idInteger), user.getFirstNameString(), user.getLastNameString());
 		
 		return ResponseEntity.ok(new AuthenticationResponse(jwtString));
 	}

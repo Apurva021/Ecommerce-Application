@@ -30,6 +30,11 @@ public class JwtUtil {
     	Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
     	return (String)claims.get("payload");
     }
+    
+    public String getFullName(String token) {
+    	Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    	return (String)claims.get("fullName");
+    }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -43,9 +48,11 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails, String payloadString) {
+    public String generateToken(UserDetails userDetails, String payloadString, String firstName, String lastName) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("payload", payloadString);
+        String fullNameString = firstName + " " + lastName;
+        claims.put("fullName", fullNameString);
         return createToken(claims, userDetails.getUsername());
     }
 

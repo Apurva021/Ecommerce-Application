@@ -1,4 +1,4 @@
-package com.majorproject.userservicev1;
+package com.apurva.cartservice;
 
 import org.springframework.stereotype.Service;
 

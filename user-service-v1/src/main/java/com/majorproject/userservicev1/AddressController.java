@@ -34,7 +34,7 @@ public class AddressController {
 	public boolean canAccess(HttpServletRequest request, Integer userIdInteger) {
 		String jwtString = request.getHeader("Authorization").substring(7);
 		String emailString = jwtUtil.extractUsername(jwtString);
-		Integer idInteger = userRepository.findByEmailString(emailString).getUserIdInteger();
+		Integer idInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		return idInteger.equals(userIdInteger);
 	}

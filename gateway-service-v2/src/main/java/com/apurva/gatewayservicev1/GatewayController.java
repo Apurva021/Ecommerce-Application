@@ -66,7 +66,7 @@ public class GatewayController {
 		
 		Integer idInteger = userRepository.findByEmailString(authenticationRequest.getUsernameString()).getUserIdInteger();
 		
-		String jwtString = jwtUtil.generateToken(userDetails);
+		String jwtString = jwtUtil.generateToken(userDetails, Integer.toString(idInteger));
 		
 		return ResponseEntity.ok(new AuthenticationResponse(jwtString));
 	}

@@ -16,23 +16,23 @@ public class OrderController {
 	@Autowired
 	private OrderRepository orderRepository;
 	
-	@GetMapping("/{orderIdInteger}")
+	@GetMapping("/order/{orderIdInteger}")
 	public Optional<Order> getOrderById(@PathVariable Integer orderIdInteger) {
 		return orderRepository.findById(orderIdInteger);
 	}
 	
-	@PutMapping("/{orderIdInteger}")
+	@PutMapping("/update/{orderIdInteger}")
 	public String updateOrderById(@RequestBody Order order) {
 		orderRepository.save(order);
 		return "Order updated successfully!";
 	}
 	
-	@GetMapping("/{userIdInteger}")
+	@GetMapping("/user/{userIdInteger}")
 	public List<Order> getOrdersByUserId(@PathVariable Integer userIdInteger) {
 		return orderRepository.findByUserIdInteger(userIdInteger);
 	}
 	
-	@GetMapping("/{sellerIdInteger}")
+	@GetMapping("/seller/{sellerIdInteger}")
 	public List<Order> getOrdersBySellerId(@PathVariable Integer sellerIdInteger) {
 		return orderRepository.findBySellerIdInteger(sellerIdInteger);
 	}

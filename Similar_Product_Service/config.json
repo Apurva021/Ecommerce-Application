@@ -1,0 +1,59 @@
+{
+    "database":{
+        "uri":"mongodb+srv://rutvik:17bit008@productcatalog.poqge.mongodb.net/ProductCatalog?retryWrites=true&w=majority",
+        "name":"ProductCatalog",
+        "collection":"product"
+    },
+    "server":{
+        "port":3001
+    },
+    "searchAggragate":{
+        "similarity":[
+            {
+              "$search": {
+                "index": "similarity", 
+                "text": {
+                  "query": "grap", 
+                  "path": [
+                    "longDescription","type"
+                  ]
+                }
+              }
+            },
+            {"$project": 
+              {
+              "productId":1,
+              "score":{"$meta":"searchScore"}
+              }
+            }, 
+            {"$sort": {
+             "score":-1
+             }
+            }, 
+            {"$limit": 11},
+             {
+              "$match": {
+                  "productId": {
+                      "$ne": "13"
+                  }
+              }
+          }
+          ]
+    },
+    "eureka":{
+      "host":"127.0.0.1",
+      "port":8761,
+      "hostname":"localhost",
+      "ipAddress":"127.0.0.1",
+      "enabled":true,
+      "dataCenter":{
+        "name":"MyOwn"
+      },
+      "servicePath":"/eureka/apps/",
+      "maxRetries":5,
+      "requestRetryDelay": 5000
+    },
+    "application":{
+      "name":"SimilarProducts"
+    }
+}

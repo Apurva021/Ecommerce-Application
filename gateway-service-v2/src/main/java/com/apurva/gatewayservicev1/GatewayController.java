@@ -1,6 +1,7 @@
 package com.apurva.gatewayservicev1;
 
 import java.util.Optional;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -109,7 +110,27 @@ public class GatewayController {
 		userRepository.save(user);
 		
 		return "Password Updated Succesfully!";
+	}
+	
+	@PostMapping("/forgot-password/{userEmailId}")
+	public String forgotPassword(HttpServletRequest request ,@PathVariable String userEmailId) throws Exception {
+		User user = userRepository.findByEmailString(userEmailId);
+		if(user == null) {
+			throw new Exception("No such email registered!");
+		}
 		
+		StringBuilder newPasswordBuilder = new StringBuilder();
+		String candidateString = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		Random random = new Random();
+		for(int i=0;i<8;++i) {
+			newPasswordBuilder.append(candidateString.charAt(random.nextInt(candidateString.length())));
+		}
+		//this email needs to be sent to the user from the email service
+		String emailString = "Your new Password is " + newPasswordBuilder.toString();
 		
+		user.setPasswordString(bCryptPasswordEncoder.encode(newPasswordBuilder.toString()));
+		userRepository.save(user);
+		
+		return emailString;
 	}
 }

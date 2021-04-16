@@ -19,12 +19,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.apurva.gatewayservicev1.kafka.KafkaController;
+
 @RestController
 @RequestMapping
 public class GatewayController {
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private KafkaController kafkaController;
 	
 	@Autowired
 	private JwtUtil jwtUtil;
@@ -44,7 +49,7 @@ public class GatewayController {
 		Integer idInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		return idInteger.equals(userIdInteger);
-	}
+		}
 	
 	@PostMapping("/signup")
 	public String register(@RequestBody User user) throws Exception{
@@ -56,7 +61,8 @@ public class GatewayController {
 		
 		user.setPasswordString(bCryptPasswordEncoder.encode(user.getPasswordString()));
 		userRepository.save(user);
-		return "User registered";
+		return kafkaController.signUpNotification(user);
+		//return "User registered";
 	}
 	
 	@GetMapping("/login")
@@ -109,10 +115,10 @@ public class GatewayController {
 		user.setPasswordString(bCryptPasswordEncoder.encode(changePasswordRequest.getNewPasswordString()));
 		userRepository.save(user);
 		
-		return "Password Updated Succesfully!";
+		return kafkaController.passwordUpdate(user);
 	}
 	
-	@PostMapping("/forgot-password/{userEmailId}")
+	@GetMapping("/forgot-password/{userEmailId}")
 	public String forgotPassword(HttpServletRequest request ,@PathVariable String userEmailId) throws Exception {
 		User user = userRepository.findByEmailString(userEmailId);
 		if(user == null) {
@@ -126,11 +132,13 @@ public class GatewayController {
 			newPasswordBuilder.append(candidateString.charAt(random.nextInt(candidateString.length())));
 		}
 		//this email needs to be sent to the user from the email service
-		String emailString = "Your new Password is " + newPasswordBuilder.toString();
+		
 		
 		user.setPasswordString(bCryptPasswordEncoder.encode(newPasswordBuilder.toString()));
 		userRepository.save(user);
 		
-		return emailString;
+		return kafkaController.forgotPassword(user, newPasswordBuilder.toString());
+		
+	
 	}
 }

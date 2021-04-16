@@ -54,6 +54,6 @@
       "requestRetryDelay": 5000
     },
     "application":{
-      "name":"SimilarProducts"
+      "name":"similarproducts"
     }
 }

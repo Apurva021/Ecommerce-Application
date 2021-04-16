@@ -1,20 +1,11 @@
-package com.apurva.orderservice;
+package com.apurva.recommenderservice;
 
 
 import java.sql.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
-@Entity
-@Table(name = "Order_Table")
 public class Order {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer orderIdInteger;
 	
 	enum OrderStatus {

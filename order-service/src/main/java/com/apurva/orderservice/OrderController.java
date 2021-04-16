@@ -73,4 +73,10 @@ public class OrderController {
 	public String createOrder() {
 		return "Order Created!";
 	}
+	
+	@PostMapping("/create-order")
+	public String createOrder(HttpServletRequest request, @RequestBody Order order) {
+		orderRepository.save(order);
+		return "Order Confirmed!";
+	}
 }

@@ -18,7 +18,7 @@ public class Order {
 	private Integer orderIdInteger;
 	
 	enum OrderStatus {
-		CONFIRMED, SHIPPPED, CANCELLED, DELIVERD
+		PENDING, CONFIRMED, SHIPPPED, CANCELLED, DELIVERD
 	}
 	
 	private Integer userIdInteger;	//customer-id
@@ -53,7 +53,7 @@ public class Order {
 		this.dateOfPurchaseDate = dateOfPurchaseDate;
 		this.dateOfDeliverDate = dateOfDeliverDate;
 		this.billAmountDouble = billAmountDouble;
-		this.orderStatus = OrderStatus.CONFIRMED;
+		this.orderStatus = OrderStatus.PENDING;
 	}
 
 

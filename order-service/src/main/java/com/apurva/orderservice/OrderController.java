@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -79,5 +80,22 @@ public class OrderController {
 		order.setOrderStatus("PENDING");
 		orderRepository.save(order);
 		return "Order Confirmed!";
+	}
+	
+	/**
+	 * this request takes as parameter a receipt-id
+	 * and it updates the order status of all the orders with that <receipt-id>
+	 * to what is specified in the request parameter orderStatus
+	 */
+	@GetMapping("/update-order-status")
+	public String updateOrderStatusByReceiptId(HttpServletRequest request, @RequestParam String receiptId, @RequestParam String orderStatus) throws Exception {
+		List<Order> orders = orderRepository.findByReceiptIdString(receiptId);
+		
+		for(Order order : orders) {
+			order.setOrderStatus(orderStatus);
+			orderRepository.save(order);
+		}
+		
+		return "Updated Order Status!";
 	}
 }

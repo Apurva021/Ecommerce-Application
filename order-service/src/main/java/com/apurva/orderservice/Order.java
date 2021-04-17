@@ -32,7 +32,7 @@ public class Order {
 	
 	private Double billAmountDouble;
 	
-	private OrderStatus orderStatus;
+	private String orderStatusString;
 	
 	private String receiptIdString;
 	
@@ -45,7 +45,7 @@ public class Order {
 	
 	public Order(Integer orderIdInteger, Integer userIdInteger, Integer sellerIdInteger, Integer productIdInteger,
 			Integer addressIdInteger, Integer quantityBoughtInteger, Date dateOfPurchaseDate, Date dateOfDeliverDate,
-			Double billAmountDouble, String receiptIdString, String sellerId) {
+			Double billAmountDouble, String receiptIdString, String sellerId, String orderStatus) {
 		super();
 		this.orderIdInteger = orderIdInteger;
 		this.userIdInteger = userIdInteger;
@@ -56,7 +56,7 @@ public class Order {
 		this.dateOfPurchaseDate = dateOfPurchaseDate;
 		this.dateOfDeliverDate = dateOfDeliverDate;
 		this.billAmountDouble = billAmountDouble;
-		this.orderStatus = OrderStatus.PENDING;
+		this.orderStatusString = orderStatus;
 		this.receiptIdString = receiptIdString;
 		this.sellerId = sellerId;
 	}
@@ -152,11 +152,11 @@ public class Order {
 		this.billAmountDouble = billAmountDouble;
 	}
 
-	public OrderStatus getOrderStatus() {
-		return orderStatus;
+	public String getOrderStatus() {
+		return orderStatusString;
 	}
 
-	public void setOrderStatus(OrderStatus orderStatus) {
-		this.orderStatus = orderStatus;
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatusString = orderStatus;
 	}
 }

@@ -213,7 +213,7 @@ public class CartController {
 			requestBodyMap.put("dateOfPurchaseDate", dateOfPurchaseDate);
 			requestBodyMap.put("dateOfDeliverDate", dateOfDeliveryDate);
 			requestBodyMap.put("billAmountDouble", billAmountDouble);
-			requestBodyMap.put("orderStatus", orderStatus);
+			requestBodyMap.put("orderStatusString", orderStatus);
 			requestBodyMap.put("receiptIdString", receiptIdString);
 			requestBodyMap.put("sellerId", sellerId);
 			

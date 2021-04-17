@@ -76,6 +76,7 @@ public class OrderController {
 	
 	@PostMapping("/create-order")
 	public String createOrder(HttpServletRequest request, @RequestBody Order order) {
+		order.setOrderStatus("PENDING");
 		orderRepository.save(order);
 		return "Order Confirmed!";
 	}

@@ -51,7 +51,9 @@ public class CartController {
 		}
 		else {
 			for(String productId: cart.getProductMap().keySet()) {
-				products.add(restTemplate.getForObject("http://productcatalog/product" + productId, Product.class));
+				Product[] tempProducts =restTemplate.getForObject("http://productcatalog/product?id=" + productId, Product[].class);
+				tempProducts[0].setQuantityBought(cart.getProductMap().get(productId));
+				products.add(tempProducts[0]);
 			}
 		}
 		return products;
@@ -73,8 +75,9 @@ public class CartController {
 		}
 		
 		if(cart.getProductMap().containsKey(productId)) {
-			Product product = restTemplate.getForObject("http://productcatalog/product" + productId, Product.class);
-			return product;
+			Product[] products = restTemplate.getForObject("http://productcatalog/product?id=" + productId, Product[].class);
+			products[0].setQuantityBought(cart.getProductMap().get(productId));
+			return products[0];
 		}
 		else {
 			throw new Exception("No Such Product Found in cart!");

@@ -2,3 +2,4 @@
 .mvn
 .DS_Store
 .properties
+node_modules

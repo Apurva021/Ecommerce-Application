@@ -9,8 +9,16 @@ public class Product {
 	private String imageUri;
 	private String shortDescription;
 	private Integer quantityBought;
+	private String sellerId;
 	
 	
+	
+	public String getSellerId() {
+		return sellerId;
+	}
+	public void setSellerId(String sellerId) {
+		this.sellerId = sellerId;
+	}
 	public Integer getQuantityBought() {
 		return quantityBought;
 	}

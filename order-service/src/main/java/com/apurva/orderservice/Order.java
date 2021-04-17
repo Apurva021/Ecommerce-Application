@@ -34,6 +34,9 @@ public class Order {
 	
 	private OrderStatus orderStatus;
 	
+	private String receiptIdString;
+	
+	private String sellerId;
 	
 	public Order() {
 		super();
@@ -42,7 +45,7 @@ public class Order {
 	
 	public Order(Integer orderIdInteger, Integer userIdInteger, Integer sellerIdInteger, Integer productIdInteger,
 			Integer addressIdInteger, Integer quantityBoughtInteger, Date dateOfPurchaseDate, Date dateOfDeliverDate,
-			Double billAmountDouble) {
+			Double billAmountDouble, String receiptIdString, String sellerId) {
 		super();
 		this.orderIdInteger = orderIdInteger;
 		this.userIdInteger = userIdInteger;
@@ -54,9 +57,28 @@ public class Order {
 		this.dateOfDeliverDate = dateOfDeliverDate;
 		this.billAmountDouble = billAmountDouble;
 		this.orderStatus = OrderStatus.PENDING;
+		this.receiptIdString = receiptIdString;
+		this.sellerId = sellerId;
 	}
 
+	
 
+
+	public String getSellerId() {
+		return sellerId;
+	}
+
+	public void setSellerId(String sellerId) {
+		this.sellerId = sellerId;
+	}
+
+	public String getReceiptIdString() {
+		return receiptIdString;
+	}
+
+	public void setReceiptIdString(String receiptIdString) {
+		this.receiptIdString = receiptIdString;
+	}
 
 	public Integer getOrderIdInteger() {
 		return orderIdInteger;

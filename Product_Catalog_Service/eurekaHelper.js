@@ -12,6 +12,7 @@ exports.registerWithEureka = (appName, PORT) =>{
     instance: {
       app: appName,
       hostName: hostName,
+        instanceId:hostName+":"+ PORT,
       ipAddr: ipAddr,
       port: {
         '$': PORT,

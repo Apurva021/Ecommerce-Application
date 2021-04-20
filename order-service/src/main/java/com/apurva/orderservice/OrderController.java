@@ -1,5 +1,9 @@
 package com.apurva.orderservice;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,6 +91,29 @@ public class OrderController {
 	 * and it updates the order status of all the orders with that <receipt-id>
 	 * to what is specified in the request parameter orderStatus
 	 */
+	
+	@GetMapping("/receipt/{receiptId}")
+	public Receipt getProductsOfOrder(@PathVariable String receiptId) {
+		List<Order> orders = orderRepository.findByReceiptIdString(receiptId);
+		List<OrderItem> ls = new ArrayList<>();
+		for(Order order: orders) {
+			ls.add(new OrderItem(""+order.getProductIdInteger(),order.getQuantityBoughtInteger(),order.getBillAmountDouble()));
+		}
+		
+		Receipt receipt = new Receipt();
+		receipt.setOrderItems(ls);
+		receipt.setUserId(""+orders.get(0).getUserIdInteger());
+		receipt.setAddressId(""+orders.get(0).getAddressIdInteger());
+		if(orders.get(0).getDateOfPurchaseDate()==null) {			
+			receipt.setDateOfPurchase(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+			
+		}
+		else
+		{receipt.setDateOfPurchase(""+orders.get(0).getDateOfPurchaseDate());}
+		
+		
+		return receipt;
+	}
 	@GetMapping("/update-order-status")
 	public String updateOrderStatusByReceiptId(HttpServletRequest request, @RequestParam String receiptId, @RequestParam String orderStatus) throws Exception {
 		List<Order> orders = orderRepository.findByReceiptIdString(receiptId);

@@ -1,6 +1,6 @@
 const Eureka = require('eureka-js-client').Eureka;
-const conf = require("./config.json").eureka;
-const server = require("./config.json").server;
+const conf = require("./config.js").eureka;
+const server = require("./config.js").server;
 
 const eurekaHost = (process.env.EUREKA_CLIENT_SERVICEURL_DEFAULTZONE || conf.host);
 const eurekaPort = conf.port;
@@ -12,8 +12,8 @@ exports.registerWithEureka = (appName, PORT) =>{
     instance: {
       app: appName,
       hostName: hostName,
-        instanceId:hostName+":"+ PORT,
       ipAddr: ipAddr,
+      instanceId:hostName+":"+PORT,
       port: {
         '$': PORT,
         '@enabled': conf.enabled,

@@ -25,13 +25,14 @@ public class User {
 	private String firstNameString;
 	private String lastNameString;
 	private boolean isSeller;
+	private String phoneNumberString;
 	
 	public User() {
 		
 	}
 	
 	public User(Integer userIdInteger, @Email @NotEmpty String emailString, String passwordString,
-			String firstNameString, String lastNameString, boolean isSeller) {
+			String firstNameString, String lastNameString, boolean isSeller, String phoneNumberString) {
 		super();
 		this.userIdInteger = userIdInteger;
 		this.emailString = emailString;
@@ -39,6 +40,7 @@ public class User {
 		this.firstNameString = firstNameString;
 		this.lastNameString = lastNameString;
 		this.isSeller = false;
+		this.phoneNumberString = phoneNumberString;
 	}
 
 	public boolean isSeller() {
@@ -89,6 +91,14 @@ public class User {
 
 	public void setLastNameString(String lastNameString) {
 		this.lastNameString = lastNameString;
+	}
+
+	public String getPhoneNumberString() {
+		return phoneNumberString;
+	}
+
+	public void setPhoneNumberString(String phoneNumberString) {
+		this.phoneNumberString = phoneNumberString;
 	}	
 	
 	

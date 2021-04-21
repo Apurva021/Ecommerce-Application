@@ -10,6 +10,8 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -93,14 +95,19 @@ public class OrderController {
 	 */
 	
 	@GetMapping("/receipt/{receiptId}")
-	public Receipt getProductsOfOrder(@PathVariable String receiptId) {
+	public ResponseEntity<Receipt> getProductsOfOrder(@PathVariable String receiptId) {
 		List<Order> orders = orderRepository.findByReceiptIdString(receiptId);
+		
 		List<OrderItem> ls = new ArrayList<>();
 		for(Order order: orders) {
 			ls.add(new OrderItem(""+order.getProductIdInteger(),order.getQuantityBoughtInteger(),order.getBillAmountDouble()));
 		}
 		
 		Receipt receipt = new Receipt();
+		if(orders.size()<1) {
+			return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+		}
+		
 		receipt.setOrderItems(ls);
 		receipt.setUserId(""+orders.get(0).getUserIdInteger());
 		receipt.setAddressId(""+orders.get(0).getAddressIdInteger());
@@ -112,7 +119,7 @@ public class OrderController {
 		{receipt.setDateOfPurchase(""+orders.get(0).getDateOfPurchaseDate());}
 		
 		
-		return receipt;
+		return new ResponseEntity<>(receipt,HttpStatus.OK);
 	}
 	@GetMapping("/update-order-status")
 	public String updateOrderStatusByReceiptId(HttpServletRequest request, @RequestParam String receiptId, @RequestParam String orderStatus) throws Exception {

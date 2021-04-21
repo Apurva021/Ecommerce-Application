@@ -69,6 +69,9 @@ public class UserController {
 		return "Now you can sell products!";
 	}
 	
-	
+	@GetMapping("/temp/{userId}")
+	public Optional<User> tempFunction(@PathVariable Integer userId) {
+		return userRepository.findById(userId);
+	}
 	
 }

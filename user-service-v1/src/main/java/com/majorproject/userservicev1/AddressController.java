@@ -68,7 +68,7 @@ public class AddressController {
 		if(!canAccess(request, userIdInteger)) {
 			throw new Exception("Access Denied to sensitive information");
 		}
-		address.setUser(new User(userIdInteger,"","","", "",false));
+		address.setUser(new User(userIdInteger,"","","", "",false,""));
 		addressRepository.save(address);
 		return "Address saved";
 	}
@@ -86,7 +86,7 @@ public class AddressController {
 		if(!canAccess(request, userIdInteger)) {
 			throw new Exception("Access Denied to sensitive information");
 		}
-		address.setUser(new User(userIdInteger,"","","", "",false));
+		address.setUser(new User(userIdInteger,"","","","", false,""));
 		address.setAddressIdInteger(addressIdInteger);
 		addressRepository.save(address);
 		return "Address updates successfully!";
@@ -107,5 +107,10 @@ public class AddressController {
 		}
 		addressRepository.deleteById(addressIdInteger);
 		return "Address removed";
+	}
+	
+	@GetMapping("/address/{addressId}")
+	public Address getAddress(@PathVariable Integer addressId) {
+		return addressRepository.findAddressByAddressIdInteger(addressId);
 	}
 }

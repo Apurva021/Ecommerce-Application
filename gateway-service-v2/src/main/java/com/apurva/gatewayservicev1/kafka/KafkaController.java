@@ -72,8 +72,10 @@ public class KafkaController {
 		email.setSubject("Account Created !");
 		
 		
+		String confirmAccountUrl="http://localhost:8081/confirm-account?confirmationToken=" + user.getConfirmationTokenString();
+		String text = emailTemplate.greetings(user.getFirstNameString() + " " + user.getLastNameString(), confirmAccountUrl);
 		
-		String text = emailTemplate.greetings(user.getFirstNameString() + " " + user.getLastNameString());
+		
 		
 		email.setText(Base64.getEncoder().encodeToString(text.getBytes()));
 		

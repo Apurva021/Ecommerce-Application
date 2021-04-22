@@ -1,4 +1,5 @@
 package com.majorproject.userservicev1;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,18 +22,30 @@ public class User {
 	@Column(unique = true)
 	private String emailString;
 	
+	@NotEmpty
 	private String passwordString;
+	
+	@NotEmpty
 	private String firstNameString;
+	
+	@NotEmpty
 	private String lastNameString;
+	
 	private boolean isSeller;
+	
+	@NotEmpty
 	private String phoneNumberString;
+	
+	private boolean isEnabled;
+	
+	private String confirmationTokenString;
 	
 	public User() {
 		
 	}
 	
 	public User(Integer userIdInteger, @Email @NotEmpty String emailString, String passwordString,
-			String firstNameString, String lastNameString, boolean isSeller, String phoneNumberString) {
+			String firstNameString, String lastNameString, String phoneNumberString) {
 		super();
 		this.userIdInteger = userIdInteger;
 		this.emailString = emailString;
@@ -41,6 +54,9 @@ public class User {
 		this.lastNameString = lastNameString;
 		this.isSeller = false;
 		this.phoneNumberString = phoneNumberString;
+		this.isEnabled = false;
+		this.confirmationTokenString = UUID.randomUUID().toString();
+		
 	}
 
 	public boolean isSeller() {
@@ -99,7 +115,24 @@ public class User {
 
 	public void setPhoneNumberString(String phoneNumberString) {
 		this.phoneNumberString = phoneNumberString;
-	}	
+	}
+
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
+	}
+
+	public String getConfirmationTokenString() {
+		return confirmationTokenString;
+	}
+
+	public void setConfirmationTokenString(String confirmationTokenString) {
+		this.confirmationTokenString = confirmationTokenString;
+	}
+	
 	
 	
 	

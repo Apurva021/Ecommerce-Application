@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailTemplate {
 	
-	public String greetings(String fullName) {
+	public String greetings(String fullName, String confirmationLink) {
 		return "<!doctype html>\r\n"
 				+ "<html>\r\n"
 				+ "  <head>\r\n"
@@ -124,7 +124,7 @@ public class EmailTemplate {
 				+ "                        <p style=\"font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;\">Thank you for signing up on our portal.</p>\r\n"
 				+ "                        <p style=\"font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;\">Using our portal you will be able to buy all trending clothes with a single click, while sitting in the comfort of your home.</p>\r\n"
 				+ "                        <p style=\"font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;\">We hope that you have a great experience. </p>\r\n"
-				+ "                        <p style=\"font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;\">Click on to below button to start your amazing experience.</p>\r\n"
+				+ "                        <p style=\"font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;\">Click on to below button to verify your account and start your amazing experience.</p>\r\n"
 				+ "                        \r\n"
 				+ "\r\n"
 				+ "                        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"btn btn-primary\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;\">\r\n"
@@ -134,7 +134,7 @@ public class EmailTemplate {
 				+ "                                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;\">\r\n"
 				+ "                                  <tbody>\r\n"
 				+ "                                    <tr>\r\n"
-				+ "                                      <td style=\"font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: #3498db; border-radius: 5px; text-align: center;\"> <a href=\"http://localhost:8081/\" target=\"_blank\" style=\"display: inline-block; color: #ffffff; background-color: #3498db; border: solid 1px #3498db; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize; border-color: #3498db;\">Start Shopping</a> </td>\r\n"
+				+ "                                      <td style=\"font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: #3498db; border-radius: 5px; text-align: center;\"> <a href=" + confirmationLink + " target=\"_blank\" style=\"display: inline-block; color: #ffffff; background-color: #3498db; border: solid 1px #3498db; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize; border-color: #3498db;\">Verify!</a> </td>\r\n"
 				+ "                                    </tr>\r\n"
 				+ "                                  </tbody>\r\n"
 				+ "                                </table>\r\n"

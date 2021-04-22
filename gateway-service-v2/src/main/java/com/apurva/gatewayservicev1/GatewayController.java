@@ -2,10 +2,12 @@ package com.apurva.gatewayservicev1;
 
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.apurva.gatewayservicev1.kafka.KafkaController;
@@ -60,9 +63,29 @@ public class GatewayController {
 		}
 		
 		user.setPasswordString(bCryptPasswordEncoder.encode(user.getPasswordString()));
+		user.setConfirmationTokenString(UUID.randomUUID().toString());
+		user.setSeller(false);
+		user.setEnabled(false);
 		userRepository.save(user);
 		return kafkaController.signUpNotification(user);
 		//return "User registered";
+	}
+	
+	@GetMapping("/confirm-account")
+	public String confirmAccount(HttpServletRequest request, @RequestParam String confirmationToken) {
+		User user = userRepository.findByConfirmationTokenString(confirmationToken);
+		
+		if(user == null) {
+			return "Invalid Confirmation Token";
+		}
+		
+		if(user.isEnabled()) {
+			return "Email already Verified!";
+		}
+		
+		user.setEnabled(true);
+		userRepository.save(user);
+		return "Email Verified";
 	}
 	
 	@GetMapping("/login")
@@ -72,6 +95,17 @@ public class GatewayController {
 	
 	@PostMapping("/authenticate")
 	public ResponseEntity<?> loginFun(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+		
+		try {
+			User user = userRepository.findByEmailString(authenticationRequest.getUsernameString());
+			if(!user.isEnabled()) {
+				throw new Exception("Account not verifed");
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			return new ResponseEntity<>("Account Not verified", HttpStatus.OK);
+		}
 		
 		try {
 			authenticationManager.authenticate(

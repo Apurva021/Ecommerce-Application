@@ -73,5 +73,10 @@ public class UserController {
 	public Optional<User> tempFunction(@PathVariable Integer userId) {
 		return userRepository.findById(userId);
 	}
+
+	@GetMapping("/seller/{userId}")
+	public Seller getSellerById(@PathVariable Integer userId, HttpServletRequest request) {
+		return sellerRepository.findByUserUserIdInteger(userId);
+	}
 	
 }

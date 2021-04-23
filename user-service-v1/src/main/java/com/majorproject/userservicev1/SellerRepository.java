@@ -4,4 +4,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface SellerRepository extends CrudRepository<Seller, Integer>{
 	public void deleteByUserUserIdInteger(Integer userIdInteger);
+	public Seller findByUserUserIdInteger(Integer userIdInteger);
 }

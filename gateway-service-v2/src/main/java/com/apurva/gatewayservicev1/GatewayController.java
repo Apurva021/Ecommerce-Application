@@ -90,7 +90,8 @@ public class GatewayController {
 	
 	@GetMapping("/login")
 	public String loginPage(HttpServletRequest request) {
-		return "Login Page " + jwtUtil.getFullName(request.getHeader("Authorization").substring(7));
+		return "Login Page " + jwtUtil.getFullName(request.getHeader("Authorization").substring(7)) 
+		+ " isSeller:" + jwtUtil.isSeller(request.getHeader("Authorization").substring(7));
 	}
 	
 	@PostMapping("/authenticate")
@@ -121,7 +122,7 @@ public class GatewayController {
 		Integer idInteger = userRepository.findByEmailString(authenticationRequest.getUsernameString()).getUserIdInteger();
 		User user = userRepository.findByEmailString(authenticationRequest.getUsernameString());
 		
-		String jwtString = jwtUtil.generateToken(userDetails, Integer.toString(idInteger), user.getFirstNameString(), user.getLastNameString());
+		String jwtString = jwtUtil.generateToken(userDetails, Integer.toString(idInteger), user.getFirstNameString(), user.getLastNameString(), user.isSeller());
 		
 		return ResponseEntity.ok(new AuthenticationResponse(jwtString));
 	}

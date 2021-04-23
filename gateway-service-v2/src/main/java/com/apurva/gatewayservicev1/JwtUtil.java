@@ -3,6 +3,7 @@ package com.apurva.gatewayservicev1;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,6 +37,11 @@ public class JwtUtil {
     	return (String)claims.get("fullName");
     }
 
+    public boolean isSeller(String token) {
+        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+        return (boolean)claims.get("isSeller");
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -48,11 +54,13 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails, String payloadString, String firstName, String lastName) {
+    //payloadString is the userIdInteger 
+    public String generateToken(UserDetails userDetails, String payloadString, String firstName, String lastName, boolean isSeller) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("payload", payloadString);
         String fullNameString = firstName + " " + lastName;
         claims.put("fullName", fullNameString);
+        claims.put("isSeller", isSeller);
         return createToken(claims, userDetails.getUsername());
     }
 

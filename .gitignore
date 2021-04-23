@@ -3,3 +3,4 @@
 .DS_Store
 .properties
 node_modules
+.vscode

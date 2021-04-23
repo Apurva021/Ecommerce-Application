@@ -7,7 +7,6 @@ public class Product {
 	private Double price;
 	private Integer inStock;
 	private String imageUri;
-	private String shortDescription;
 	private Integer quantityBought;
 	private String sellerId;
 	
@@ -55,13 +54,6 @@ public class Product {
 	public void setImageUri(String imageUri) {
 		imageUri = imageUri;
 	}
-	public String getShortDescription() {
-		return shortDescription;
-	}
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = shortDescription;
-	}
-	
 	
 	
 	

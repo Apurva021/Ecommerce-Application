@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.review.model.NewReview;
 import com.review.model.Product;
+import com.review.model.ProductReviews;
 import com.review.model.Review;
 import com.review.repository.ReviewRepository;
 import com.review.resources.ReviewResource;
@@ -33,8 +35,8 @@ public class ReviewController {
 		return res.getByReviewId(reviewId);
 	}
 	
-	@RequestMapping(value="/product/review", method=RequestMethod.GET)
-	public List<Review> getByProductId(@RequestParam("id") String productId) {
+	@RequestMapping(value="/product/review/{productId}", method=RequestMethod.GET)
+	public ProductReviews getByProductId(@PathVariable("productId") String productId) {
 		return res.getByProductId(productId);
 	}
 	

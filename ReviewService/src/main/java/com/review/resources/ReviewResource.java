@@ -1,5 +1,6 @@
 package com.review.resources;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.review.model.NewReview;
 import com.review.model.Product;
+import com.review.model.ProductReviews;
 import com.review.model.Review;
 import com.review.repository.ReviewRepository;
 
@@ -32,8 +34,24 @@ public class ReviewResource {
 		return repo.findByReviewId(reviewId);
 	}
 	
-	public List<Review> getByProductId(String productId) {
-		return repo.findByProductId(productId);
+	public ProductReviews getByProductId(String productId) {
+		List<Review> data = repo.findByProductId(productId);
+		ProductReviews res = new ProductReviews();
+		int avgRating=0;
+		List<Review> reviews = new ArrayList<>();
+		for(Review r : data) {
+			avgRating+=r.getRating();
+			if(r.getReviewText()!=null && r.getReviewText().length()>0) {
+				reviews.add(r);
+			}
+		}
+		
+		avgRating/=data.size();
+		
+		res.setAvgRating(avgRating);
+		res.setReviews(reviews);
+		
+		return res;
 	}
 	
 	public ResponseEntity<Object> addReview(NewReview body, String jwtString) {

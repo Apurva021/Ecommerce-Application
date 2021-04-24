@@ -3,9 +3,8 @@ package com.apurva.orderservice;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
 public class OrderController {
 	@Autowired
@@ -27,6 +27,7 @@ public class OrderController {
 	
 	@Autowired 
 	private JwtUtil jwtUtil;
+	
 	
 	public boolean canAccess(HttpServletRequest request, Integer userIdInteger) {
 		String jwtString = request.getHeader("Authorization").substring(7);
@@ -132,4 +133,14 @@ public class OrderController {
 		
 		return "Updated Order Status!";
 	}
+	
+	@GetMapping("/secret/{orderId}")
+	public Order getOrderForApi(@PathVariable Integer orderId) {
+		return orderRepository.findByOrderIdInteger(orderId);
+	}
+//	@GetMapping("/testing/{eventType}")
+//	public String testingEndpoint(@PathVariable String eventType) {
+//			return kafkaTemplate.send("InventoryStream",new ReserveStockMessage(eventType)).toString();
+//		
+//	}
 }

@@ -5,6 +5,8 @@ const Consumer = kafka.Consumer;
  const Offset = kafka.Offset;
 const config = require("./config").kafka;
 const kafkaHost = config.hostName;
+const {intiateRefund} = require("./kafkaService");
+
 
 module.exports.kafkaSubscribe= function(topic) {
     const client = new Client({ kafkaHost });
@@ -27,7 +29,10 @@ module.exports.kafkaSubscribe= function(topic) {
             }
 
             consumer.on('message', function(message) {
-               console.log(JSON.parse(message.value));
+               let msg =  JSON.parse(message.value);
+               if(msg.eventType==="OutOfStock"){
+                   intiateRefund(msg);
+               }
             });
 
             /*

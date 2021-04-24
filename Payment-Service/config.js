@@ -26,6 +26,9 @@ module.exports={
       jwtSecret:"secret",
       kafka:{
         "hostName":"localhost:9092",
-        "topicName":"paymentStream"
+        "topics":{
+         "payment": "paymentStream",
+         "inventory":"InventoryStream"
+        }
       }
 }

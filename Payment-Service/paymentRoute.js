@@ -1,6 +1,7 @@
 
 require('dotenv').config()
 
+const Payment = require("./model/payment");
 const formidable=require('formidable')
 const express=require('express')
 const router=express.Router()
@@ -103,13 +104,12 @@ router.post('/callback',(req,res)=>
                                         "txnStatus":result.resultInfo.resultStatus
                                     }
                                     kafkaPublisher.publish(config.topicName,msg);
-                                    kafkaPublisher.publish(config.topicName,msg);
+                                  
                                     //make a call to order service for generating the invoice 
                                     //console.log(result);
                                     //insert the information of transaction id and order id
-                                coll.insertOne(data)
-                                //.then(()=>console.log("Save Successfully!!"))
-                                .then((res)=>console.log("Successfully saved the Payment Info !!1"))
+                              const paymentRecord = new Payment(data);
+                              paymentRecord.save().then(()=>console.log("Successfully saved the Payment Info !!1"))
                                 .catch(()=>console.log("Unable to save the Transaction!!!"));
                                     // db.collection('payments').doc('mPDd5z0pNiInbSIIotfj').update({paymentHistory:firebase.firestore.FieldValue.arrayUnion(result)})
                                     // .then(()=>console.log("Update success"))
@@ -325,12 +325,12 @@ router.post('/refund/',(req,res)=>{
      if(receiptId ==null || refundAmount==null){
          res.status(400).send({message:"Either receipt id or refund amount missing !!!!"});
      }else{
-         let coll = req.app.coll;
-         coll.find({'orderId':receiptId},(err,data)=>{
+      
+         Payment.findOne({'orderId':receiptId},(err,result)=>{
              if(err){
                  res.status(500).send({"message":err})
              }else{
-                 data.toArray().then(result=>{
+               
                 if(result.length==0){
                     res.status(404).send({message:"Order Not found !!!"});
                 }else{
@@ -338,8 +338,8 @@ router.post('/refund/',(req,res)=>{
                     paytmParams.body = {
                         "mid"          : process.env.PAYTM_MID,
                         "txnType"      : "REFUND",
-                        "orderId"      : result[0].orderId,
-                        "txnId"        : result[0].txnId,
+                        "orderId"      : result.orderId,
+                        "txnId"        : result.txnId,
                         "refId"        : "REFUNDID_"+Date.now(),
                         "refundAmount" : JSON.stringify(refundAmount),
                         
@@ -384,7 +384,7 @@ router.post('/refund/',(req,res)=>{
                         
                      })
                     }   
-                }).catch((e)=>console.log(e));
+               
                 
              }
             

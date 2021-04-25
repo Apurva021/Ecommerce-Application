@@ -28,7 +28,9 @@ module.exports={
         "hostName":"localhost:9092",
         "topics":{
          "payment": "paymentStream",
-         "inventory":"InventoryStream"
+         "inventory":"InventoryStream",
+         "orderFulfillment":"OrderFulfillmentStream",
+         "order":"OrderStream"
         }
       }
 }

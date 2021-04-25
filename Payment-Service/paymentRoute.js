@@ -103,7 +103,7 @@ router.post('/callback',(req,res)=>
                                         "cardScheme":result.cardScheme,
                                         "txnStatus":result.resultInfo.resultStatus
                                     }
-                                    kafkaPublisher.publish(config.topicName,msg);
+                                    kafkaPublisher.publish(config.topics.orderFulfillment,msg);
                                   
                                     //make a call to order service for generating the invoice 
                                     //console.log(result);

@@ -68,7 +68,7 @@ app.listen(port,async()=>
         {console.log( err)}
         else{
             console.log("Databse Connected Sucessfully !!!");
-           KafkaListner.kafkaSubscribe(config.kafka.topics.inventory);
+           KafkaListner.kafkaSubscribe(config.kafka.topics.payment);
         }
     });
    

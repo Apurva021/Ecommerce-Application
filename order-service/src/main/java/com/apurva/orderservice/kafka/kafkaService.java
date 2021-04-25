@@ -56,7 +56,7 @@ public class kafkaService {
 			stockMessage.setEventType("confirmed");
 			stockMessage.setProducts(products);
 			
-			kafkaTemplate.send(env.getProperty("my.kafka.topics"), stockMessage);
+			kafkaTemplate.send(env.getProperty("my.kafka.topics.inventory"), stockMessage);
 			
 			System.out.println("Message Consumed.....event published");
 			

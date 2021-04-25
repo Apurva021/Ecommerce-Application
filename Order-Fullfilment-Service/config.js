@@ -25,7 +25,8 @@ module.exports={
             "payment":"paymentStream",
             "order":"OrderStream",
             "email":"EmailStream",
-            "orderFulfillment":"OrderFulfillmentStream"
+            "orderFulfillment":"OrderFulfillmentStream",
+            "inventory":"InventoryStream"
         }
     }
 }

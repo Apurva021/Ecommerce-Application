@@ -6,7 +6,7 @@ const Consumer = kafka.Consumer;
  const Offset = kafka.Offset;
 const kafkaHost = config.hostName;
 
-const {useMessage, cancelOrderMail} = require('./kafkaService');
+const {usePaymentInfo, cancelOrderMail, initateRefund} = require('./kafkaService');
 
 module.exports.kafkaSubscribe= function(topic) {
     const client = new Client({ kafkaHost });
@@ -31,9 +31,11 @@ module.exports.kafkaSubscribe= function(topic) {
             consumer.on('message', function(message) {
               let eventData =JSON.parse(message.value);
               if(eventData.eventType==='PAYMENT'){
-                  useMessage(eventData);
-              }else if(eventData.eventType==='OutOfStockRefund'){
+                usePaymentInfo(eventData);
+              }else if(eventData.eventType==='OutOfStockRefund' || eventData.eventType==="ReturnedOrderRefund"){
                   cancelOrderMail(eventData);
+              }else if(eventData.eventType==="OrderCanceled"){
+                    initateRefund(eventData);
               }
             });
 

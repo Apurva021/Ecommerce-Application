@@ -39,7 +39,7 @@ app.use(express.urlencoded())
 
 //==================================LISTEN-KAFAKA-EVENTS==============================================
 
-listner.kafkaSubscribe(config.kafka.topics.payment);
+listner.kafkaSubscribe(config.kafka.topics.orderFulfillment);
 
 //==================================DEFINE-ROUTES==============================================
 

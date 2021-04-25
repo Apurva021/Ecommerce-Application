@@ -24,7 +24,8 @@ module.exports={
         "topics":{
             "payment":"paymentStream",
             "order":"OrderStream",
-            "email":"EmailStream"
+            "email":"EmailStream",
+            "orderFulfillment":"OrderFulfillmentStream"
         }
     }
 }

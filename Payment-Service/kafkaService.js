@@ -1,7 +1,12 @@
+require('dotenv').config()
+
 const fetch = require("node-fetch")
 const Payment = require("./model/payment")
 const kafkaPublisher =require("./KafkaPublisher")
 const config = require("./config")
+const PaytmChecksum=require('./PaytmChecksum')
+const https=require('https')
+
 
 exports.intiateRefund=async(data)=>{
     
@@ -18,7 +23,7 @@ exports.intiateRefund=async(data)=>{
  
     //console.log(orderInfo);
 
-    let refundAmount = orderInfo.billAmountDouble*quantityBoughtInteger;
+    let refundAmount = orderInfo.billAmountDouble*orderInfo.quantityBoughtInteger;
     let orderId = orderInfo.receiptIdString;
   let payment = await Payment.findOne({orderId:orderId});
   
@@ -79,7 +84,6 @@ exports.intiateRefund=async(data)=>{
                        } = res
 
                        let msg = {
-                           eventType:"OutOfStockRefund",
                            refundResponse:{
                             acceptRefundStatus,
                             acceptRefundTimestamp,
@@ -88,11 +92,17 @@ exports.intiateRefund=async(data)=>{
                             refundId,
                             refundAmount,
                             resultInfo
-                           }
+                           },
+                           orderId:data.orderId
                        }
                        
-                       kafkaPublisher.publish(config.kafka.topics.payment, msg)
-
+                       if(data.eventType==="OutOfStock"){
+                            msg.eventType="OutOfStockRefund";
+                       }else{
+                           msg.eventType="ReturnedOrderRefund";
+                       }
+                       kafkaPublisher.publish(config.kafka.topics.orderFulfillment, msg)
+                       console.log(msg.eventType + " event published....");
                     });
                 });
                 post_req.write(post_data);

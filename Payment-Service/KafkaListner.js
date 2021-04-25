@@ -30,7 +30,7 @@ module.exports.kafkaSubscribe= function(topic) {
 
             consumer.on('message', function(message) {
                let msg =  JSON.parse(message.value);
-               if(msg.eventType==="OutOfStock"){
+               if(msg.eventType==="OutOfStock" || msg.eventType==="OrderReturned" ){
                    intiateRefund(msg);
                }
             });

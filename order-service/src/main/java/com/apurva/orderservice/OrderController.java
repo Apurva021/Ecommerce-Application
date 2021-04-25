@@ -7,10 +7,13 @@ import java.util.List;
 
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +21,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.apurva.orderservice.kafka.OrderCancelEvent;
 
 
 @RestController
@@ -27,6 +32,9 @@ public class OrderController {
 	
 	@Autowired 
 	private JwtUtil jwtUtil;
+	
+	@Autowired
+	private KafkaTemplate<String, OrderCancelEvent> orderCancelKafkaTemplate;
 	
 	
 	public boolean canAccess(HttpServletRequest request, Integer userIdInteger) {
@@ -122,6 +130,7 @@ public class OrderController {
 		
 		return new ResponseEntity<>(receipt,HttpStatus.OK);
 	}
+	
 	@GetMapping("/update-order-status")
 	public String updateOrderStatusByReceiptId(HttpServletRequest request, @RequestParam String receiptId, @RequestParam String orderStatus) throws Exception {
 		List<Order> orders = orderRepository.findByReceiptIdString(receiptId);
@@ -138,6 +147,36 @@ public class OrderController {
 	public Order getOrderForApi(@PathVariable Integer orderId) {
 		return orderRepository.findByOrderIdInteger(orderId);
 	}
+	
+	@GetMapping("/cancel/{orderId}")
+	public String cancelOrderById(@PathVariable Integer orderId, HttpServletRequest request, HttpServletResponse response) {
+		Order order = orderRepository.findByOrderIdInteger(orderId);
+		
+		if(order == null) {
+			//return 404 error on front-end
+			return "No such order exists";
+		}
+		
+		if(!canAccess(request, order.getUserIdInteger())) {
+			//Access Denied
+			return "Access Denied to sensitive resource";
+		}
+		
+		if(order.getOrderStatus().equalsIgnoreCase("CONFIRMED")) {
+			order.setOrderStatus("CANCELLED");
+			orderRepository.save(order);
+			OrderCancelEvent orderCancelEvent = new OrderCancelEvent();
+			orderCancelEvent.setEventType("OrderCanceled");
+			orderCancelEvent.setOrderId(Integer.toString(orderId));
+			
+			orderCancelKafkaTemplate.send("OrderFulfillmentStream", orderCancelEvent);
+			return "Order cancelled! And kafka Message Generated";
+		}
+		else {
+			return "This order cannot be canceled";
+		}
+	}
+	
 //	@GetMapping("/testing/{eventType}")
 //	public String testingEndpoint(@PathVariable String eventType) {
 //			return kafkaTemplate.send("InventoryStream",new ReserveStockMessage(eventType)).toString();

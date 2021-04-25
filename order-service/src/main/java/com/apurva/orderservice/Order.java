@@ -156,7 +156,7 @@ public class Order {
 		return orderStatusString;
 	}
 
-	public void setOrderStatus(String orderStatus) {
-		this.orderStatusString = orderStatus;
+	public void setOrderStatus(String orderStatusString) {
+		this.orderStatusString = orderStatusString;
 	}
 }

@@ -49,6 +49,23 @@ public class KafkaConfiguration {
 		return new KafkaTemplate<>(producerFactory());
 	}
 	
+	@Bean
+	public ProducerFactory<String,OrderCancelEvent> producerFactory1() {
+		
+		
+		Map<String,Object> config = new HashMap<>();
+		config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, env.getProperty("spring.kafka.producer.bootstrap-servers"));
+		config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+		config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+		
+		return new DefaultKafkaProducerFactory<>(config);
+	}
+	
+	@Bean
+	public KafkaTemplate<String, OrderCancelEvent> kafkaTemplate1(){
+		return new KafkaTemplate<>(producerFactory1());
+	}
+	
 	//============================CONSUMER-CONFIGURATION=============================================
 	
 	@Bean

@@ -2,6 +2,7 @@ package com.majorproject.userservicev1;
 
 import java.util.List;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,17 +41,34 @@ public class AddressController {
 	}
 	
 	/**
+	 * Instead of canAccess now use cookies to implement access-control
+	 * @param request
+	 * @return
+	 */
+	public String getJwtToken(HttpServletRequest request) {
+		Cookie cookies[] = request.getCookies();
+		for(Cookie cookie: cookies) {
+			if(cookie.getName().equals("authCookie")) {
+				return cookie.getValue();
+			}
+		}
+		
+		return "";
+	}
+	
+	/**
 	 * Endpoint to get all Addresses of the user
 	 * @param request
 	 * @param userIdInteger
 	 * @return
 	 * @throws Exception
 	 */
-	@GetMapping("/{userIdInteger}/addresses")
-	public List<Address> getAddresses(HttpServletRequest request, @PathVariable Integer userIdInteger) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive information");
-		}
+	@GetMapping("/addresses")
+	public List<Address> getAddresses(HttpServletRequest request) throws Exception{
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		return addressRepository.findAddressByUserUserIdInteger(userIdInteger);
 	}
 	
@@ -62,12 +80,12 @@ public class AddressController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PostMapping("/{userIdInteger}/addresses")
-	public String addAddress(HttpServletRequest request ,@PathVariable Integer userIdInteger, @RequestBody Address address) throws Exception{
+	@PostMapping("/addresses")
+	public String addAddress(HttpServletRequest request , @RequestBody Address address) throws Exception{
 		
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access Denied to sensitive information");
-		}
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		address.setUser(new User(userIdInteger,"","","", "",""));
 		addressRepository.save(address);
 		return "Address saved";
@@ -81,11 +99,12 @@ public class AddressController {
 	 * @param address
 	 * @return
 	 */
-	@PutMapping("/{userIdInteger}/addresses/{addressIdInteger}")
-	public String updateAddressById(HttpServletRequest request, @PathVariable Integer userIdInteger, @PathVariable Integer addressIdInteger, @RequestBody Address address) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access Denied to sensitive information");
-		}
+	@PutMapping("/addresses/{addressIdInteger}")
+	public String updateAddressById(HttpServletRequest request, @PathVariable Integer addressIdInteger, @RequestBody Address address) throws Exception{
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		address.setUser(new User(userIdInteger,"","","","", ""));
 		address.setAddressIdInteger(addressIdInteger);
 		addressRepository.save(address);
@@ -100,11 +119,12 @@ public class AddressController {
 	 * @return
 	 * @throws Exception
 	 */
-	@DeleteMapping("/{userIdInteger}/addresses/{addressIdInteger}")
-	public String deleteAddressById(HttpServletRequest request, @PathVariable Integer userIdInteger, @PathVariable Integer addressIdInteger) throws Exception {
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access Denied to sensitive information");
-		}
+	@DeleteMapping("/addresses/{addressIdInteger}")
+	public String deleteAddressById(HttpServletRequest request, @PathVariable Integer addressIdInteger) throws Exception {
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		addressRepository.deleteById(addressIdInteger);
 		return "Address removed";
 	}

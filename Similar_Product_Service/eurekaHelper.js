@@ -13,7 +13,7 @@ var client;
     instance: {
       app: app.name,
       hostName: hostName,
-       instanceId:hostName+":"+PORT,
+       instanceId:hostName+":"+server.port,
       ipAddr: ipAddr,
       port: {
         '$': server.port,

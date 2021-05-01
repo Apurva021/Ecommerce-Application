@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -36,20 +37,24 @@ public class CartController {
 	@Autowired
 	private JwtUtil jwtUtil;
 	
-	public boolean canAccess(HttpServletRequest request, Integer userIdInteger) {
-		String jwtString = request.getHeader("Authorization").substring(7);
-		String emailString = jwtUtil.extractUsername(jwtString);
-		Integer idInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+	
+	public String getJwtToken(HttpServletRequest request) {
+		Cookie cookies[] = request.getCookies();
+		for(Cookie cookie: cookies) {
+			if(cookie.getName().equals("authCookie")) {
+				return cookie.getValue();
+			}
+		}
 		
-		return idInteger.equals(userIdInteger);
+		return "";
 	}
 	
-	@GetMapping("/{userIdInteger}")
-	public List<Product> getProductsByUserId(HttpServletRequest request ,@PathVariable Integer userIdInteger) throws Exception{
+	@GetMapping("/get-cart")
+	public List<Product> getProductsByUserId(HttpServletRequest request ) throws Exception{
 		
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive resource");
-		}
+		String jwtString = getJwtToken(request);
+		
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		Cart cart = cartRepository.findByUserIdInteger(userIdInteger);
 		List<Product> products = new ArrayList<>();
@@ -60,46 +65,35 @@ public class CartController {
 			cartRepository.save(cart);
 		}
 		else {
-			for(String productId: cart.getProductMap().keySet()) {
+			for(String productCompositeId: cart.getProductMap().keySet()) {
+				String productId = productCompositeId.split("@")[0];
+				String sizeString = productCompositeId.split("@")[1];
 				Product[] tempProducts =restTemplate.getForObject("http://productcatalog/product?id=" + productId, Product[].class);
-				tempProducts[0].setQuantityBought(cart.getProductMap().get(productId));
+				tempProducts[0].setQuantityBought(cart.getProductMap().get(productCompositeId));
+				tempProducts[0].setSizeString(sizeString);
 				products.add(tempProducts[0]);
 			}
 		}
 		return products;
 	}
 	
-	@GetMapping("/{userIdInteger}/{productId}")
-	public Product getProductFromCart(HttpServletRequest request ,@PathVariable Integer userIdInteger, @PathVariable String productId) throws Exception {
-		
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive resource");
-		}
-		
-		Cart cart = cartRepository.findByUserIdInteger(userIdInteger);
-		if(cart == null) {
-			cart = new Cart();
-			cart.setUserIdInteger(userIdInteger);
-			cart.setProductMap(new HashMap<String, Integer>());
-			cartRepository.save(cart);
-		}
-		
-		if(cart.getProductMap().containsKey(productId)) {
-			Product[] products = restTemplate.getForObject("http://productcatalog/product?id=" + productId, Product[].class);
-			products[0].setQuantityBought(cart.getProductMap().get(productId));
-			return products[0];
-		}
-		else {
-			throw new Exception("No Such Product Found in cart!");
-		}
-	}
 	
-	@PostMapping("/{userIdInteger}/{productId}")
-	public String addProductById(HttpServletRequest request ,@PathVariable Integer userIdInteger, @PathVariable String productId) throws Exception {
+	/**
+	 * Endpoint to add product to cart
+	 * @param request
+	 * @param productId
+	 * @param sizeString
+	 * @return
+	 * @throws Exception
+	 */
+	@GetMapping("/add-to-cart/{productId}/{sizeString}")
+	public String addProductById(HttpServletRequest request, @PathVariable String productId, @PathVariable String sizeString) throws Exception {
 		
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive resource");
-		}
+		
+		
+		String jwtString = getJwtToken(request);
+		
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		Cart cart = cartRepository.findByUserIdInteger(userIdInteger);
 		if(cart == null) {
@@ -108,18 +102,33 @@ public class CartController {
 			cart.setProductMap(new HashMap<String, Integer>());
 			cartRepository.save(cart);
 		}
-		cart.getProductMap().put(productId, cart.getProductMap().getOrDefault(productId, 0) + 1);
+		
+		//we will create different orders for different sizes of the same product
+		productId = productId + "@" + sizeString;
+		int prevQuantity = 0;
+		if(cart.getProductMap().containsKey(productId)) {
+			prevQuantity = cart.getProductMap().get(productId);
+		}
+		
+		cart.getProductMap().put(productId, prevQuantity + 1);
+		
 		cartRepository.save(cart);
 		
 		return "Added product to cart";
 	}
 	
-	@PutMapping("/{userIdInteger}/{productId}")
-	public String removeProductById(HttpServletRequest request ,@PathVariable Integer userIdInteger, @PathVariable String productId) throws Exception{
+	/**
+	 * Endpoint to reduce quantity of product from cart by 1
+	 * @param request
+	 * @param productId
+	 * @return
+	 * @throws Exception
+	 */
+	@PutMapping("/edit-cart/{productId}")
+	public String removeProductById(HttpServletRequest request , @PathVariable String productId) throws Exception{
 		
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive resource");
-		}
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		Cart cart = cartRepository.findByUserIdInteger(userIdInteger);
 		if(cart == null) {
@@ -141,12 +150,18 @@ public class CartController {
 		return "Product Quantity reduced by 1";
 	}
 	
-	@DeleteMapping("/{userIdInteger}/{productId}")
-	public String deleteProductById(HttpServletRequest request ,@PathVariable Integer userIdInteger, @PathVariable String productId) throws Exception {
+	/**
+	 * Endpoint to remove all quantity of the product from cart
+	 * @param request
+	 * @param productId
+	 * @return
+	 * @throws Exception
+	 */
+	@DeleteMapping("/remove-from-cart/{productId}")
+	public String deleteProductById(HttpServletRequest request , @PathVariable String productId) throws Exception {
 		
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive resource");
-		}
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		Cart cart = cartRepository.findByUserIdInteger(userIdInteger);
 		if(cart == null) {
@@ -161,19 +176,19 @@ public class CartController {
 		return "Product removed from cart";
 	}
 	
+	
 	/**
 	 * This method requires a Request parameter ?addressId=<integer value>
 	 * this address id has to be available in the address table
 	 * and that address has to belong to the user
 	 * we can make him pick the address using radio button by showing his available addresses
 	 */
-	
-	
-	@GetMapping("/checkout/{userIdInteger}")
-	public String checkooutCart(@RequestParam Integer addressId ,HttpServletRequest request, @PathVariable Integer userIdInteger) throws Exception {
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Acess Denied to sensitive resource!");
-		}
+	@GetMapping("/checkout")
+	public String checkooutCart(@RequestParam Integer addressId ,HttpServletRequest request) throws Exception {
+		
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString)); 
 		
 		// declaring data for the request body
 		String receiptIdString = RandomStringUtils.random(10, true, true);
@@ -190,7 +205,9 @@ public class CartController {
 		
 		String sellerId;
 		
-		List<Product> productsPurchased = getProductsByUserId(request, userIdInteger);
+		String sizeString;
+		
+		List<Product> productsPurchased = getProductsByUserId(request);
 		
 		for(Product product : productsPurchased) {
 			billAmountDouble = product.getPrice();
@@ -200,6 +217,7 @@ public class CartController {
 			productIdInteger = Integer.parseInt(product.getProductId());
 			dateOfPurchaseDate = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 			dateOfDeliveryDate = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+			sizeString = product.getSizeString();
 			
 			totalBillDouble += (billAmountDouble * quantityBoughtInteger);
 			orderStatus = "PENDING";
@@ -216,9 +234,10 @@ public class CartController {
 			requestBodyMap.put("orderStatusString", orderStatus);
 			requestBodyMap.put("receiptIdString", receiptIdString);
 			requestBodyMap.put("sellerId", sellerId);
+			requestBodyMap.put("sizeString", sizeString);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("Authorization", request.getHeader("Authorization"));
+			headers.set("Authorization", (String)request.getAttribute("Authorization"));
 			
 			HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBodyMap, headers);
 			
@@ -229,7 +248,7 @@ public class CartController {
 			}
 			
 			
-			deleteProductById(request, userIdInteger, product.getProductId());
+			deleteProductById(request, product.getProductId()+"@"+product.getSizeString());
 			
 		}
 		

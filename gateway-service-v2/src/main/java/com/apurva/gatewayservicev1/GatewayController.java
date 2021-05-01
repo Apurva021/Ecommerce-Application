@@ -1,10 +1,13 @@
 package com.apurva.gatewayservicev1;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +17,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +26,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.ModelAttribute;
 import com.apurva.gatewayservicev1.kafka.KafkaController;
 
-@RestController
+@Controller
 @RequestMapping
 public class GatewayController {
 	
@@ -89,13 +94,36 @@ public class GatewayController {
 	}
 	
 	@GetMapping("/login")
-	public String loginPage(HttpServletRequest request) {
-		return "Login Page " + jwtUtil.getFullName(request.getHeader("Authorization").substring(7)) 
-		+ " isSeller:" + jwtUtil.isSeller(request.getHeader("Authorization").substring(7));
+	public String loginPage(HttpServletRequest request, HttpServletResponse response) {
+		return "Login Page " + jwtUtil.getFullName(((String) request.getAttribute("Authorization")).substring(7)) 
+		+ " isSeller:" + jwtUtil.isSeller(((String) request.getAttribute("Authorization")).substring(7));
 	}
 	
-	@PostMapping("/authenticate")
-	public ResponseEntity<?> loginFun(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+	@GetMapping("/authenticate")
+	public String getAuthPage(HttpServletRequest request, HttpServletResponse response, Model model) {
+		AuthenticationRequest authenticationRequest = new AuthenticationRequest();
+		model.addAttribute("authenticationRequest", authenticationRequest);
+		if(request.getCookies() != null) {
+			Cookie[] cookies = request.getCookies();
+			for(Cookie cookie: cookies) {
+				if(cookie.getName().equals("authCookie")) {
+					//System.out.println("ALREADY LOGGED IN");
+					try {
+						response.sendRedirect("/hello");
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		return "authenticate";
+	}
+	
+	@PostMapping(path="/authenticate")
+	public String loginFun(@ModelAttribute("authenticationRequest") AuthenticationRequest authenticationRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
 		
 		try {
 			User user = userRepository.findByEmailString(authenticationRequest.getUsernameString());
@@ -105,8 +133,9 @@ public class GatewayController {
 			
 		} catch (Exception e) {
 			// TODO: handle exception
-			return new ResponseEntity<>("Account Not verified", HttpStatus.OK);
+			return "Your account is not verified!";
 		}
+		
 		
 		try {
 			authenticationManager.authenticate(
@@ -114,7 +143,7 @@ public class GatewayController {
 		}
 		catch (BadCredentialsException e) {
 			// TODO: handle exception
-			throw new Exception("Incorrect username or password", e);
+			return "redirect:/authenticate?error";
 		}
 		
 		UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getUsernameString());
@@ -124,14 +153,47 @@ public class GatewayController {
 		
 		String jwtString = jwtUtil.generateToken(userDetails, Integer.toString(idInteger), user.getFirstNameString(), user.getLastNameString(), user.isSeller());
 		
-		return ResponseEntity.ok(new AuthenticationResponse(jwtString));
+		
+		response.setHeader("Authorization", "Bearer " + jwtString);
+		Cookie cookie = new Cookie("authCookie", jwtString);
+		cookie.setMaxAge(60 * 60 * 10);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+		
+		response.sendRedirect("/hello");
+		
+		return "hello";
+		
 	}
 	
-	@PostMapping("/change-password/{userIdInteger}")
-	public String changePassword(HttpServletRequest request, @RequestBody ChangePasswordRequest changePasswordRequest, @PathVariable Integer userIdInteger) throws Exception {
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive Resource!");
+	@GetMapping("/hello")
+	public String hello(HttpServletRequest request, Model model) throws Exception{
+		Cookie[] cookies = request.getCookies();
+		String jwtString = "";
+		
+		for(Cookie cookie : cookies) {
+			if(cookie.getName().equals("authCookie")) {
+				jwtString = cookie.getValue();
+			}
 		}
+		
+		String jwtTokenString = jwtString;
+		
+		
+		String usernameString = jwtUtil.extractUsername(jwtTokenString);
+		
+		model.addAttribute("name", usernameString);
+		
+		return "hello";
+	}
+	
+	
+	@PostMapping("/change-password")
+	public String changePassword(HttpServletRequest request, @RequestBody ChangePasswordRequest changePasswordRequest) throws Exception {
+		
+		String jwtString = ((String) request.getAttribute("Authorization")).substring(7);
+		
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		User user = userRepository.findByUserIdInteger(userIdInteger);
 		try {
@@ -176,4 +238,26 @@ public class GatewayController {
 		
 	
 	}
+	
+	@GetMapping("/signout")
+	public String logoutFunction(Model model ,HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Cookie cookie = new Cookie("authCookie", "");
+		cookie.setMaxAge(0);
+		cookie.setPath("/");
+		response.addCookie(cookie);
+		return "signout";
+	}
+	
+	@PostMapping("/signout")
+	public ResponseEntity<?> logoutPostFunction(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Cookie cookie = new Cookie("authCookie", "");
+		cookie.setMaxAge(0);
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
+		cookie.setSecure(false);
+		response.addCookie(cookie);
+		
+		return new ResponseEntity<>("",HttpStatus.OK);
+	}
+	
 }

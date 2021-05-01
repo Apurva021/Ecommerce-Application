@@ -38,6 +38,8 @@ public class Order {
 	
 	private String sellerId;
 	
+	private String sizeString;
+	
 	public Order() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -45,7 +47,7 @@ public class Order {
 	
 	public Order(Integer orderIdInteger, Integer userIdInteger, Integer sellerIdInteger, Integer productIdInteger,
 			Integer addressIdInteger, Integer quantityBoughtInteger, Date dateOfPurchaseDate, Date dateOfDeliverDate,
-			Double billAmountDouble, String receiptIdString, String sellerId, String orderStatus) {
+			Double billAmountDouble, String receiptIdString, String sellerId, String orderStatus, String sizeString) {
 		super();
 		this.orderIdInteger = orderIdInteger;
 		this.userIdInteger = userIdInteger;
@@ -59,6 +61,7 @@ public class Order {
 		this.orderStatusString = orderStatus;
 		this.receiptIdString = receiptIdString;
 		this.sellerId = sellerId;
+		this.sizeString = sizeString;
 	}
 
 	
@@ -158,5 +161,13 @@ public class Order {
 
 	public void setOrderStatus(String orderStatusString) {
 		this.orderStatusString = orderStatusString;
+	}
+
+	public String getSizeString() {
+		return sizeString;
+	}
+
+	public void setSizeString(String sizeString) {
+		this.sizeString = sizeString;
 	}
 }

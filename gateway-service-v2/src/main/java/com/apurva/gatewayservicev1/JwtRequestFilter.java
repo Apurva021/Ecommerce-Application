@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,12 +29,27 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		String authorizationHeaderString = request.getHeader("Authorization");
+		
+		Cookie authCookie = new Cookie("authCookie", "");
+		
+		if(request.getCookies() != null) {
+			Cookie[] cookies = request.getCookies();
+			for(Cookie cookie : cookies) {
+				if(cookie.getName().equals("authCookie")) {
+					authCookie.setValue(cookie.getValue());
+				}
+			}
+		}
+		
+			
+		request.setAttribute("Authorization", "Bearer " + authCookie.getValue());
+		
+		String authorizationHeaderString = (String) request.getAttribute("Authorization");
 		
 		String usernameString = null;
 		String jwtString = null;
 		
-		if(authorizationHeaderString != null && authorizationHeaderString.startsWith("Bearer ")) {
+		if(authorizationHeaderString != null && authorizationHeaderString.startsWith("Bearer ") && authorizationHeaderString.length() > 10) {
 			jwtString = authorizationHeaderString.substring(7);
 			usernameString = jwtUtil.extractUsername(jwtString);
 		}

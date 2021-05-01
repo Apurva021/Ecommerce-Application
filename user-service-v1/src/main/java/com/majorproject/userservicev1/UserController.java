@@ -2,6 +2,7 @@ package com.majorproject.userservicev1;
 
 import java.util.Optional;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,32 +29,40 @@ public class UserController {
 	@Autowired
 	private JwtUtil jwtUtil;
 	
+	
+	
 	/**
-	 * The method returns whether a particular resource 
-	 * can be accessed by the user or not
+	 * Instead of canAccess now use cookies to implement access-control
+	 * @param request
 	 * @return
 	 */
-	public boolean canAccess(HttpServletRequest request, Integer userIdInteger) {
-		String jwtString = request.getHeader("Authorization").substring(7);
-		String emailString = jwtUtil.extractUsername(jwtString);
-		Integer idInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+	public String getJwtToken(HttpServletRequest request) {
+		Cookie cookies[] = request.getCookies();
+		for(Cookie cookie: cookies) {
+			if(cookie.getName().equals("authCookie")) {
+				return cookie.getValue();
+			}
+		}
 		
-		return idInteger.equals(userIdInteger);
+		return "";
 	}
 	
-	@GetMapping("/{userIdInteger}")
-	public Optional<User> getUser(HttpServletRequest request, @PathVariable Integer userIdInteger) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive information");
-		}
+	@GetMapping("/user")
+	public Optional<User> getUser(HttpServletRequest request) throws Exception{
+		
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		return userRepository.findById(userIdInteger);
 	}
 	
-	@PostMapping("/{userIdInteger}/become-seller")
-	public String becomeSeller(HttpServletRequest request, @RequestBody BecomeSellerRequest becomeSellerRequest, @PathVariable Integer userIdInteger) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied");
-		}
+	@PostMapping("/become-seller")
+	public String becomeSeller(HttpServletRequest request, @RequestBody BecomeSellerRequest becomeSellerRequest) throws Exception{
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		String emailString = jwtUtil.extractUsername(request.getHeader("Authorization").substring(7));
 		User user = userRepository.findByEmailString(emailString);
 		if(user.isSeller()) {

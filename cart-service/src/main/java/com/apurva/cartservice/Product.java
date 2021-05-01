@@ -9,9 +9,15 @@ public class Product {
 	private String imageUri;
 	private Integer quantityBought;
 	private String sellerId;
+	private String sizeString;
 	
 	
-	
+	public String getSizeString() {
+		return sizeString;
+	}
+	public void setSizeString(String sizeString) {
+		this.sizeString = sizeString;
+	}
 	public String getSellerId() {
 		return sellerId;
 	}

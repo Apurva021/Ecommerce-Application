@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,6 +45,17 @@ public class OrderController {
 		return idInteger.equals(userIdInteger);
 	}
 	
+	public String getJwtToken(HttpServletRequest request) {
+		Cookie cookies[] = request.getCookies();
+		for(Cookie cookie: cookies) {
+			if(cookie.getName().equals("authCookie")) {
+				return cookie.getValue();
+			}
+		}
+		
+		return "";
+	}
+	
 	@GetMapping("/order/{orderIdInteger}")
 	public Order getOrderById(HttpServletRequest request, @PathVariable Integer orderIdInteger) throws Exception{
 		Order order = orderRepository.findByOrderIdInteger(orderIdInteger);
@@ -52,7 +63,7 @@ public class OrderController {
 			throw new Exception("No such order id!");
 		}
 		else {
-			String jwtString = request.getHeader("Authorization").substring(7);
+			String jwtString = getJwtToken(request);
 			Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 			if(order.getUserIdInteger() != userIdInteger) {
 				throw new Exception("Access denied to sensitive data!");
@@ -72,11 +83,12 @@ public class OrderController {
 		return "Order updated successfully!";
 	}
 	
-	@GetMapping("/user/{userIdInteger}")
-	public List<Order> getOrdersByUserId(HttpServletRequest request,@PathVariable Integer userIdInteger) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive resource!");
-		}
+	@GetMapping("/user/my-orders")
+	public List<Order> getOrdersByUserId(HttpServletRequest request) throws Exception{
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		return orderRepository.findByUserIdInteger(userIdInteger);
 	}
 	
@@ -85,10 +97,6 @@ public class OrderController {
 		return orderRepository.findBySellerIdInteger(sellerIdInteger);
 	}
 	
-	@PostMapping("/")
-	public String createOrder() {
-		return "Order Created!";
-	}
 	
 	@PostMapping("/create-order")
 	public String createOrder(HttpServletRequest request, @RequestBody Order order) {

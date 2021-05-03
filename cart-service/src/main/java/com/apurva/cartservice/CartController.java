@@ -124,8 +124,8 @@ public class CartController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PutMapping("/edit-cart/{productId}")
-	public String removeProductById(HttpServletRequest request , @PathVariable String productId) throws Exception{
+	@PutMapping("/remove-one-from-cart/{productId}/{sizeString}")
+	public String removeProductById(HttpServletRequest request , @PathVariable String productId, @PathVariable String sizeString) throws Exception{
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
@@ -137,6 +137,8 @@ public class CartController {
 			cart.setProductMap(new HashMap<String, Integer>());
 			cartRepository.save(cart);
 		}
+		
+		productId = productId + "@" + sizeString;
 		
 		if(cart.getProductMap().containsKey(productId)) {
 			cart.getProductMap().put(productId, cart.getProductMap().get(productId) - 1);
@@ -157,8 +159,8 @@ public class CartController {
 	 * @return
 	 * @throws Exception
 	 */
-	@DeleteMapping("/remove-from-cart/{productId}")
-	public String deleteProductById(HttpServletRequest request , @PathVariable String productId) throws Exception {
+	@DeleteMapping("/remove-all-from-cart/{productId}/{sizeString}")
+	public String deleteProductById(HttpServletRequest request , @PathVariable String productId, @PathVariable String sizeString) throws Exception {
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
@@ -170,6 +172,8 @@ public class CartController {
 			cart.setProductMap(new HashMap<String, Integer>());
 			cartRepository.save(cart);
 		}
+		
+		productId = productId + "@" + sizeString;
 		
 		cart.getProductMap().remove(productId);
 		cartRepository.save(cart);
@@ -248,7 +252,7 @@ public class CartController {
 			}
 			
 			
-			deleteProductById(request, product.getProductId()+"@"+product.getSizeString());
+			deleteProductById(request, product.getProductId(), product.getSizeString());
 			
 		}
 		

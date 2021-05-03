@@ -59,6 +59,22 @@ public class GatewayController {
 		return idInteger.equals(userIdInteger);
 		}
 	
+	/**
+	 * Instead of canAccess now use cookies to implement access-control
+	 * @param request
+	 * @return
+	 */
+	public String getJwtToken(HttpServletRequest request) {
+		Cookie cookies[] = request.getCookies();
+		for(Cookie cookie: cookies) {
+			if(cookie.getName().equals("authCookie")) {
+				return cookie.getValue();
+			}
+		}
+		
+		return "";
+	}
+	
 	@PostMapping("/signup")
 	public String register(@RequestBody User user) throws Exception{
 		User dupUser = userRepository.findByEmailString(user.getEmailString());

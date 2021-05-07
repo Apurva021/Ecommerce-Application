@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.majorproject.userservicev1.ListAddresses;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.ui.Model;
 
 @RestController
 @RequestMapping
@@ -64,12 +68,14 @@ public class AddressController {
 	 * @throws Exception
 	 */
 	@GetMapping("/addresses")
-	public List<Address> getAddresses(HttpServletRequest request) throws Exception{
+	public ListAddresses getAddresses(HttpServletRequest request) throws Exception{
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
-		return addressRepository.findAddressByUserUserIdInteger(userIdInteger);
+		ListAddresses listAddresses = new ListAddresses();
+		listAddresses.setAddresses(addressRepository.findAddressByUserUserIdInteger(userIdInteger));
+		return listAddresses;
 	}
 	
 	/**
@@ -81,13 +87,16 @@ public class AddressController {
 	 * @throws Exception
 	 */
 	@PostMapping("/addresses")
-	public String addAddress(HttpServletRequest request , @RequestBody Address address) throws Exception{
+	public String addAddress(HttpServletRequest request , @ModelAttribute Address address, Model model, HttpServletResponse response) throws Exception{
+		
+		model.addAttribute("address", address);
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		address.setUser(new User(userIdInteger,"","","", "",""));
 		addressRepository.save(address);
+		response.sendRedirect("http://localhost:8081/api/user/my-addresses?address=added");
 		return "Address saved";
 	}
 	
@@ -119,13 +128,14 @@ public class AddressController {
 	 * @return
 	 * @throws Exception
 	 */
-	@DeleteMapping("/addresses/{addressIdInteger}")
-	public String deleteAddressById(HttpServletRequest request, @PathVariable Integer addressIdInteger) throws Exception {
+	@GetMapping("/addresses/{addressIdInteger}")
+	public String deleteAddressById(HttpServletRequest request, @PathVariable Integer addressIdInteger, HttpServletResponse response) throws Exception {
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
 		addressRepository.deleteById(addressIdInteger);
+		response.sendRedirect("http://localhost:8081/api/user/my-addresses?address=deleted");
 		return "Address removed";
 	}
 	

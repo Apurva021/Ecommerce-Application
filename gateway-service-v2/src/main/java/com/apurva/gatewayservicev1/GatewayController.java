@@ -74,22 +74,74 @@ public class GatewayController {
 		
 		return "";
 	}
+	/*
+	@GetMapping("/signup")
+	public String getSignUpPage(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+		SignUpRequest signUpRequest = new SignUpRequest();
+		model.addAttribute("signUpRequest", signUpRequest);
+		return "signup";
+	}
 	
-	@PostMapping("/signup")
-	public String register(@RequestBody User user) throws Exception{
+	@PostMapping(path="/signup")
+	public String register(@ModelAttribute("signUpRequest") SignUpRequest signUpRequest, HttpServletResponse response) throws Exception{
+		User user = new User();
+		
+		
+		user.setEmailString(signUpRequest.getEmailString());
+		user.setFirstNameString(signUpRequest.getFirstNameString());
+		user.setLastNameString(signUpRequest.getLastNameString());
+		user.setPhoneNumberString(signUpRequest.getPhoneNumberString());
+		
 		User dupUser = userRepository.findByEmailString(user.getEmailString());
 		
 		if(dupUser != null) {
 			throw new Exception(user.getEmailString() + " is already registerd!");
 		}
 		
-		user.setPasswordString(bCryptPasswordEncoder.encode(user.getPasswordString()));
+		if(!signUpRequest.getPasswordString().equals(signUpRequest.getConfirmPasswordString())) {
+			throw new Exception("Passwrds dont match!!");
+		}
+		
+		user.setPasswordString(bCryptPasswordEncoder.encode(signUpRequest.getPasswordString()));
 		user.setConfirmationTokenString(UUID.randomUUID().toString());
 		user.setSeller(false);
 		user.setEnabled(false);
 		userRepository.save(user);
-		return kafkaController.signUpNotification(user);
-		//return "User registered";
+		kafkaController.signUpNotification(user);
+		response.sendRedirect("/authenticate");
+		
+		return "authenticate";
+	}
+	*/
+	
+	@PostMapping(path = "/signup")
+	public void registerUser(@ModelAttribute SignUpRequest signUpRequest, Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		model.addAttribute("signUpRequest", signUpRequest);
+		
+		User dupUser = userRepository.findByEmailString(signUpRequest.getEmailString());
+		
+		if(dupUser != null) {
+			throw new Exception("Email already registered!");
+		}
+		
+		if(!signUpRequest.getPasswordString().equals(signUpRequest.getConfirmPasswordString())) {
+			throw new Exception("The passwords do not mathch!");
+		}
+		
+		User user = new User();
+		user.setEmailString(signUpRequest.getEmailString());
+		user.setPhoneNumberString(signUpRequest.getPhoneNumberString());
+		user.setFirstNameString(signUpRequest.getFirstNameString());
+		user.setLastNameString(signUpRequest.getLastNameString());
+		user.setPasswordString(bCryptPasswordEncoder.encode(signUpRequest.getPasswordString()));
+		user.setConfirmationTokenString(UUID.randomUUID().toString());
+		user.setSeller(false);
+		user.setEnabled(false);
+		userRepository.save(user);
+		
+		response.sendRedirect("/api/user/authenticate?verify=email");
+		
 	}
 	
 	@GetMapping("/confirm-account")
@@ -116,7 +168,7 @@ public class GatewayController {
 	}
 	
 	@GetMapping("/authenticate")
-	public String getAuthPage(HttpServletRequest request, HttpServletResponse response, Model model) {
+	public String getAuthPage(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
 		AuthenticationRequest authenticationRequest = new AuthenticationRequest();
 		model.addAttribute("authenticationRequest", authenticationRequest);
 		if(request.getCookies() != null) {
@@ -134,6 +186,7 @@ public class GatewayController {
 			}
 		}
 		
+		
 		return "authenticate";
 	}
 	
@@ -143,13 +196,22 @@ public class GatewayController {
 		
 		try {
 			User user = userRepository.findByEmailString(authenticationRequest.getUsernameString());
+			if(user == null) {
+				throw new Exception("User not found exception!");
+			}
+		} catch(Exception e) {
+			return "redirect:api/user/authenticate?verify=credentials";
+		}
+		
+		try {
+			User user = userRepository.findByEmailString(authenticationRequest.getUsernameString());
 			if(!user.isEnabled()) {
 				throw new Exception("Account not verifed");
 			}
 			
 		} catch (Exception e) {
 			// TODO: handle exception
-			return "Your account is not verified!";
+			return "redirect:api/user/authenticate?verify=email";
 		}
 		
 		
@@ -159,7 +221,7 @@ public class GatewayController {
 		}
 		catch (BadCredentialsException e) {
 			// TODO: handle exception
-			return "redirect:/authenticate?error";
+			return "redirect:api/user/authenticate?verify=credentials";
 		}
 		
 		UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getUsernameString());

@@ -267,7 +267,9 @@ public class GatewayController {
 	
 	
 	@PostMapping("/change-password")
-	public String changePassword(HttpServletRequest request, @RequestBody ChangePasswordRequest changePasswordRequest, HttpServletResponse response) throws Exception {
+	public String changePassword(@ModelAttribute ChangePasswordRequest changePasswordRequest, Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		model.addAttribute("changePasswordRequest", changePasswordRequest);
 		
 		String jwtString = ((String) request.getAttribute("Authorization")).substring(7);
 		
@@ -280,19 +282,18 @@ public class GatewayController {
 		}
 		catch (Exception e) {
 			// TODO: handle exception
-			throw new Exception("Current password entered is wrong!");
+			return "redirect:http://localhost:8081/api/user/change-password?password=oldWrong";
 		}
 		
 		if(!changePasswordRequest.getNewPasswordString().equals(changePasswordRequest.getConfirmNewPasswordString())) {
-			throw new Exception("The new password fields do not match!");
+			return "redirect:http://localhost:8081/api/user/change-password?password=matchError";
 		}
 		
 		user.setPasswordString(bCryptPasswordEncoder.encode(changePasswordRequest.getNewPasswordString()));
 		userRepository.save(user);
 		
 		kafkaController.passwordUpdate(user);
-		response.sendRedirect("http://localhost:8081/api/user/change-password?password=changed");
-		return "password changed";
+		return "redirect:http://localhost:8081/api/user/change-password?password=changed";
 	}
 	
 	@GetMapping("/forgot-password/{userEmailId}")

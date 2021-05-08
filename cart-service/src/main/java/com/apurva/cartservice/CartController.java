@@ -68,10 +68,26 @@ public class CartController {
 			for(String productCompositeId: cart.getProductMap().keySet()) {
 				String productId = productCompositeId.split("@")[0];
 				String sizeString = productCompositeId.split("@")[1];
+				/*
 				Product[] tempProducts =restTemplate.getForObject("http://productcatalog/product?id=" + productId, Product[].class);
 				tempProducts[0].setQuantityBought(cart.getProductMap().get(productCompositeId));
 				tempProducts[0].setSizeString(sizeString);
 				products.add(tempProducts[0]);
+				*/
+				System.out.println("productCode:" + productId);
+				Product product = restTemplate.getForObject("http://inventory-service/product/"+productId, Product.class);
+				
+				Integer quantityBought = cart.getProductMap().get(productCompositeId);
+				
+				Available available =  restTemplate.getForObject("http://inventory-service/available?productCode=" + productId + "&size=" + sizeString +"&qty=" + quantityBought , Available.class);
+				
+				product.setIsAvailable(available.isAvailable());
+				product.setQuantityBought(quantityBought);
+				//product.setShortDescription(object.shortDescription);
+				product.setSizeString(sizeString);
+				//product.setTitle(object.title);
+				products.add(product);
+				
 			}
 		}
 		return products;
@@ -187,6 +203,7 @@ public class CartController {
 	 * and that address has to belong to the user
 	 * we can make him pick the address using radio button by showing his available addresses
 	 */
+	
 	@GetMapping("/checkout")
 	public String checkooutCart(@RequestParam Integer addressId ,HttpServletRequest request) throws Exception {
 		
@@ -216,9 +233,9 @@ public class CartController {
 		for(Product product : productsPurchased) {
 			billAmountDouble = product.getPrice();
 			quantityBoughtInteger = product.getQuantityBought();
-			sellerId = product.getSellerId();
+			sellerId = product.getManufacturer().getSellerId();
 			sellerIdInteger = null;
-			productIdInteger = Integer.parseInt(product.getProductId());
+			productIdInteger = Integer.parseInt(product.getProductCode());
 			dateOfPurchaseDate = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 			dateOfDeliveryDate = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 			sizeString = product.getSizeString();
@@ -252,7 +269,7 @@ public class CartController {
 			}
 			
 			
-			deleteProductById(request, product.getProductId(), product.getSizeString());
+			deleteProductById(request, product.getProductCode(), product.getSizeString());
 			
 		}
 		

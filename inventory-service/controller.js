@@ -15,6 +15,35 @@ exports.ping=(req,res)=>{
 exports.test = (req,res)=>{
   res.send(req.body.title);
 }
+
+// ======================= Check avaibility of product ================================================
+
+exports.checkAvailability = async(req,res)=>{
+
+  let code = req.query.productCode;
+  let qsize = req.query.size;
+  let qty = req.query.qty;
+ // console.log(code + " " + size+ " " + qty)
+
+  const product = await Product.findOne({productCode:code}).catch(e=>{console.log(e); res.send({available:false})});
+  if(product){
+      let sizes = product.sizes.filter(size=>size.value==qsize);
+     if(sizes.length>0){
+          if(sizes[0].stock>=qty){
+            res.json({available:true});
+          }else{
+            res.json({available:false})
+          }
+     }else{
+       res.status(404).json({message:"size not found", available:false});
+     }
+      
+  }else{
+    res.status(404).send({message:"Product not found", available:false});
+  }
+  
+}
+
 // ======================= GET ALL ================================================
 exports.getAllProducts = async(req,res)=>{
 

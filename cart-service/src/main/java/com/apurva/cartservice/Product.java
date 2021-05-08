@@ -2,39 +2,33 @@ package com.apurva.cartservice;
 
 public class Product {
 	
-	private String productId;
+	private String productCode;
 	private String title;
+	private String shortDescription;
 	private Double price;
-	private Integer inStock;
-	private String imageUri;
-	private Integer quantityBought;
-	private String sellerId;
 	private String sizeString;
+	private String[] imgs;
+	private Integer quantityBought;
+	private Boolean isAvailable;
+	private Manufacturer manufacturer;
 	
-	
-	public String getSizeString() {
-		return sizeString;
+	public Manufacturer getManufacturer() {
+		return manufacturer;
 	}
-	public void setSizeString(String sizeString) {
-		this.sizeString = sizeString;
+	public void setManufacturer(Manufacturer manufacturer) {
+		this.manufacturer = manufacturer;
 	}
-	public String getSellerId() {
-		return sellerId;
+	public Boolean getIsAvailable() {
+		return isAvailable;
 	}
-	public void setSellerId(String sellerId) {
-		this.sellerId = sellerId;
+	public void setIsAvailable(Boolean isAvailable) {
+		this.isAvailable = isAvailable;
 	}
-	public Integer getQuantityBought() {
-		return quantityBought;
+	public String getProductCode() {
+		return productCode;
 	}
-	public void setQuantityBought(Integer quantityBought) {
-		this.quantityBought = quantityBought;
-	}
-	public String getProductId() {
-		return productId;
-	}
-	public void setProductId(String productId) {
-		this.productId = productId;
+	public void setProductCode(String productCode) {
+		this.productCode = productCode;
 	}
 	public String getTitle() {
 		return title;
@@ -42,23 +36,54 @@ public class Product {
 	public void setTitle(String title) {
 		this.title = title;
 	}
+	public String getShortDescription() {
+		return shortDescription;
+	}
+	public void setShortDescription(String shortDescription) {
+		this.shortDescription = shortDescription;
+	}
 	public Double getPrice() {
 		return price;
 	}
 	public void setPrice(Double price) {
 		this.price = price;
 	}
-	public Integer getInStock() {
-		return inStock;
+	public String getSizeString() {
+		return sizeString;
 	}
-	public void setInStock(Integer inStock) {
-		this.inStock = inStock;
+	public void setSizeString(String sizeString) {
+		this.sizeString = sizeString;
 	}
-	public String getImageUri() {
-		return imageUri;
+	public String[] getImgs() {
+		return imgs;
 	}
-	public void setImageUri(String imageUri) {
-		imageUri = imageUri;
+	public void setImgs(String[] imgs) {
+		this.imgs = imgs;
+	}
+	public Integer getQuantityBought() {
+		return quantityBought;
+	}
+	public void setQuantityBought(Integer quantityBought) {
+		this.quantityBought = quantityBought;
+	}
+	
+	
+	static class Manufacturer{
+		String sellerId;
+		String companyName;
+		public String getSellerId() {
+			return sellerId;
+		}
+		public void setSellerId(String sellerId) {
+			this.sellerId = sellerId;
+		}
+		public String getCompanyName() {
+			return companyName;
+		}
+		public void setCompanyName(String companyName) {
+			this.companyName = companyName;
+		}
+		
 	}
 	
 	

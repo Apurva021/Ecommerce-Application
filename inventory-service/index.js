@@ -8,7 +8,9 @@ const mongoose = require('mongoose');
 const multer = require("multer");
 const {fileUpload ,categoryImageStorage, productImageStorage, bannerImageStorage} = require("./utils/fileUploadUtil");
 const kafkaListner = require("./kafka/KafkaListner");
-
+const eurekaHelper = require('./eurekaHelper');
+const conf = require("./config.json");
+eurekaHelper.registerWithEureka(conf.application.name, conf.server.port);
 
 
 //========================FILE_UPLOAD Middeleware===========================================================\
@@ -61,6 +63,7 @@ app.use(express.static('uploads'))
 
 //==================================DEFINE-ROUTES==============================================
 
+app.get("/available", controller.checkAvailability)
 app.get("/",controller.ping);
 app.get("/products/:slug", controller.getProductsBySlug);
 app.get("/product/:code", controller.getProductByCode);

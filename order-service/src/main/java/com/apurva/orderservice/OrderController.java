@@ -92,9 +92,9 @@ public class OrderController {
 		return orderRepository.findByUserIdInteger(userIdInteger);
 	}
 	
-	@GetMapping("/seller/{sellerIdInteger}")
-	public List<Order> getOrdersBySellerId(@PathVariable Integer sellerIdInteger) {
-		return orderRepository.findBySellerIdInteger(sellerIdInteger);
+	@GetMapping("/seller/{sellerIdString}")
+	public List<Order> getOrdersBySellerId(@PathVariable String sellerIdString) {
+		return orderRepository.findBySellerId(sellerIdString);
 	}
 	
 	

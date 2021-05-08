@@ -228,34 +228,40 @@ public class CartController {
 		
 		String sizeString;
 		
+		String imageLink;
+		
+		String productTitle;
+		
 		List<Product> productsPurchased = getProductsByUserId(request);
 		
 		for(Product product : productsPurchased) {
 			billAmountDouble = product.getPrice();
 			quantityBoughtInteger = product.getQuantityBought();
 			sellerId = product.getManufacturer().getSellerId();
-			sellerIdInteger = null;
+			imageLink = product.getImgs()[0];
 			productIdInteger = Integer.parseInt(product.getProductCode());
 			dateOfPurchaseDate = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 			dateOfDeliveryDate = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
 			sizeString = product.getSizeString();
+			productTitle = product.getTitle();
 			
 			totalBillDouble += (billAmountDouble * quantityBoughtInteger);
 			orderStatus = "PENDING";
 			Map<String, Object> requestBodyMap = new HashMap<>();
 			
 			requestBodyMap.put("userIdInteger", userIdInteger);
-			requestBodyMap.put("sellerIdInteger", sellerIdInteger);
+			requestBodyMap.put("imageLink", imageLink);
 			requestBodyMap.put("productIdInteger", productIdInteger);
 			requestBodyMap.put("addressIdInteger", addressIdInteger);
 			requestBodyMap.put("quantityBoughtInteger", quantityBoughtInteger);
 			requestBodyMap.put("dateOfPurchaseDate", dateOfPurchaseDate);
 			requestBodyMap.put("dateOfDeliverDate", dateOfDeliveryDate);
-			requestBodyMap.put("billAmountDouble", billAmountDouble);
+			requestBodyMap.put("billAmountDouble", billAmountDouble*quantityBoughtInteger);
 			requestBodyMap.put("orderStatusString", orderStatus);
 			requestBodyMap.put("receiptIdString", receiptIdString);
 			requestBodyMap.put("sellerId", sellerId);
 			requestBodyMap.put("sizeString", sizeString);
+			requestBodyMap.put("productTitle", productTitle);
 			
 			HttpHeaders headers = new HttpHeaders();
 			headers.set("Authorization", (String)request.getAttribute("Authorization"));

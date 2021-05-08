@@ -22,7 +22,6 @@ public class Order {
 	}
 	
 	private Integer userIdInteger;	//customer-id
-	private Integer sellerIdInteger;
 	private Integer productIdInteger;
 	private Integer addressIdInteger;
 	private Integer quantityBoughtInteger;
@@ -40,18 +39,21 @@ public class Order {
 	
 	private String sizeString;
 	
+	private String imageLink;
+	
+	private String productTitle;
+	
 	public Order() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	
-	public Order(Integer orderIdInteger, Integer userIdInteger, Integer sellerIdInteger, Integer productIdInteger,
+	public Order(Integer orderIdInteger, Integer userIdInteger, Integer productIdInteger,
 			Integer addressIdInteger, Integer quantityBoughtInteger, Date dateOfPurchaseDate, Date dateOfDeliverDate,
 			Double billAmountDouble, String receiptIdString, String sellerId, String orderStatus, String sizeString) {
 		super();
 		this.orderIdInteger = orderIdInteger;
 		this.userIdInteger = userIdInteger;
-		this.sellerIdInteger = sellerIdInteger;
 		this.productIdInteger = productIdInteger;
 		this.addressIdInteger = addressIdInteger;
 		this.quantityBoughtInteger = quantityBoughtInteger;
@@ -66,6 +68,21 @@ public class Order {
 
 	
 
+	public String getProductTitle() {
+		return productTitle;
+	}
+
+	public void setProductTitle(String productTitle) {
+		this.productTitle = productTitle;
+	}
+
+	public String getImageLink() {
+		return imageLink;
+	}
+
+	public void setImageLink(String imageLink) {
+		this.imageLink = imageLink;
+	}
 
 	public String getSellerId() {
 		return sellerId;
@@ -97,14 +114,6 @@ public class Order {
 
 	public void setUserIdInteger(Integer userIdInteger) {
 		this.userIdInteger = userIdInteger;
-	}
-
-	public Integer getSellerIdInteger() {
-		return sellerIdInteger;
-	}
-
-	public void setSellerIdInteger(Integer sellerIdInteger) {
-		this.sellerIdInteger = sellerIdInteger;
 	}
 
 	public Integer getProductIdInteger() {

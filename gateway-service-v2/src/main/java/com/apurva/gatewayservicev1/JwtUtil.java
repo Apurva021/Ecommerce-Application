@@ -36,11 +36,12 @@ public class JwtUtil {
     	Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
     	return (String)claims.get("fullName");
     }
-
-    public boolean isSeller(String token) {
-        Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-        return (boolean)claims.get("isSeller");
+    
+    public String getRole(String token) {
+    	Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+    	return (String)claims.get("role");
     }
+    
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -55,12 +56,12 @@ public class JwtUtil {
     }
 
     //payloadString is the userIdInteger 
-    public String generateToken(UserDetails userDetails, String payloadString, String firstName, String lastName, boolean isSeller) {
+    public String generateToken(UserDetails userDetails, String payloadString, String firstName, String lastName, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("payload", payloadString);
         String fullNameString = firstName + " " + lastName;
         claims.put("fullName", fullNameString);
-        claims.put("isSeller", isSeller);
+        claims.put("role", role);
         return createToken(claims, userDetails.getUsername());
     }
 

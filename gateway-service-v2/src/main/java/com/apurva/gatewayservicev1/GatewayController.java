@@ -136,7 +136,7 @@ public class GatewayController {
 		user.setLastNameString(signUpRequest.getLastNameString());
 		user.setPasswordString(bCryptPasswordEncoder.encode(signUpRequest.getPasswordString()));
 		user.setConfirmationTokenString(UUID.randomUUID().toString());
-		user.setSeller(false);
+		user.setRole("user");
 		user.setEnabled(false);
 		userRepository.save(user);
 		
@@ -163,8 +163,8 @@ public class GatewayController {
 	
 	@GetMapping("/login")
 	public String loginPage(HttpServletRequest request, HttpServletResponse response) {
-		return "Login Page " + jwtUtil.getFullName(((String) request.getAttribute("Authorization")).substring(7)) 
-		+ " isSeller:" + jwtUtil.isSeller(((String) request.getAttribute("Authorization")).substring(7));
+		String tokenString = getJwtToken(request);
+		return "Name:" + jwtUtil.getRole(tokenString) + ", Role:" + jwtUtil.getRole(tokenString);
 	}
 	
 	@GetMapping("/authenticate")
@@ -229,7 +229,7 @@ public class GatewayController {
 		Integer idInteger = userRepository.findByEmailString(authenticationRequest.getUsernameString()).getUserIdInteger();
 		User user = userRepository.findByEmailString(authenticationRequest.getUsernameString());
 		
-		String jwtString = jwtUtil.generateToken(userDetails, Integer.toString(idInteger), user.getFirstNameString(), user.getLastNameString(), user.isSeller());
+		String jwtString = jwtUtil.generateToken(userDetails, Integer.toString(idInteger), user.getFirstNameString(), user.getLastNameString(), user.getRole());
 		
 		
 		response.setHeader("Authorization", "Bearer " + jwtString);
@@ -267,7 +267,7 @@ public class GatewayController {
 	
 	
 	@PostMapping("/change-password")
-	public String changePassword(HttpServletRequest request, @RequestBody ChangePasswordRequest changePasswordRequest) throws Exception {
+	public String changePassword(HttpServletRequest request, @RequestBody ChangePasswordRequest changePasswordRequest, HttpServletResponse response) throws Exception {
 		
 		String jwtString = ((String) request.getAttribute("Authorization")).substring(7);
 		
@@ -290,7 +290,9 @@ public class GatewayController {
 		user.setPasswordString(bCryptPasswordEncoder.encode(changePasswordRequest.getNewPasswordString()));
 		userRepository.save(user);
 		
-		return kafkaController.passwordUpdate(user);
+		kafkaController.passwordUpdate(user);
+		response.sendRedirect("http://localhost:8081/api/user/change-password?password=changed");
+		return "password changed";
 	}
 	
 	@GetMapping("/forgot-password/{userEmailId}")

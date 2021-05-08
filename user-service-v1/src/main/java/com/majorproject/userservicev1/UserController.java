@@ -65,16 +65,17 @@ public class UserController {
 		
 		String emailString = jwtUtil.extractUsername(request.getHeader("Authorization").substring(7));
 		User user = userRepository.findByEmailString(emailString);
-		if(user.isSeller()) {
+		if(user.getRole().equals("seller")) {
 			throw new Exception("You are already a seller!");
 		}
-		user.setSeller(true);
+		user.setRole("seller");
 		userRepository.save(user);
 		
 		Seller seller = new Seller();
 		seller.setCompanyNameString(becomeSellerRequest.getCompanyNameString());
 		seller.setUser(user);
 		sellerRepository.save(seller);
+		
 		return "Now you can sell products!";
 	}
 	

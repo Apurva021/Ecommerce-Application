@@ -31,7 +31,7 @@ public class User {
 	@NotEmpty
 	private String lastNameString;
 	
-	private boolean isSeller;
+	private String role;
 	
 	@NotEmpty
 	private String phoneNumberString;
@@ -52,22 +52,19 @@ public class User {
 		this.passwordString = passwordString;
 		this.firstNameString = firstNameString;
 		this.lastNameString = lastNameString;
-		this.isSeller = false;
 		this.phoneNumberString = phoneNumberString;
 		this.isEnabled = false;
 		this.confirmationTokenString = UUID.randomUUID().toString();
 		
 	}
-
-	public boolean isSeller() {
-		return isSeller;
+	
+	public String getRole() {
+		return role;
 	}
 
-
-	public void setSeller(boolean isSeller) {
-		this.isSeller = isSeller;
+	public void setRole(String role) {
+		this.role = role;
 	}
-
 
 	public Integer getUserIdInteger() {
 		return userIdInteger;
@@ -137,4 +134,3 @@ public class User {
 	
 	
 }
-

@@ -6,82 +6,84 @@ const controller=require("./controller");
 const config = require('./config');
 const mongoose = require('mongoose');
 const multer = require("multer");
-const path = require("path")
-const shortid=require("shortid")
-const kafkaListner = require("./KafkaListner");
-//========================FILE_UPLOADS===========================================================
+const {fileUpload ,categoryImageStorage, productImageStorage, bannerImageStorage} = require("./utils/fileUploadUtil");
+const kafkaListner = require("./kafka/KafkaListner");
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, path.join(path.dirname(__dirname), "ProductCatalogUtilService/uploads/"));
-    },
-    filename: function (req, file, cb) {
-      cb(null, shortid.generate() + "-" + file.originalname);
-    },
-  });
 
-  const upload = multer({ storage:storage }).array('productPicture',6);
-  const upload1 = multer({storage}).single('categoryImage');
-  const uploadMiddelware = (req,res,next)=>{
 
-    if(req.body.category){
-        upload(req,res, (err)=>{
-          if(!err){
-              next();
-          }
-      }); 
-    }else{
-        upload1(req,res, (err)=>{
-            if(!err){
-                next();
-            }
-    });
-  }
-}
+//========================FILE_UPLOAD Middeleware===========================================================\
+
+const categoryImgUpload= fileUpload(multer({ storage: categoryImageStorage }).single('img'))
+const productImgUpload= fileUpload(multer({ storage: productImageStorage }).array('img',4))
+const bannerImgUpload= fileUpload(multer({ storage: bannerImageStorage }).single('img'))
+
+
+
 //========================JWT-DECODER===========================================================
-var jwtDecode = (req,res,next)=>{
+var jwtDecode = (req, res, next) => {
     if (req.headers && req.headers.authorization) {
-        var authorization = req.headers.authorization.split(' ')[1],
-            decoded;
-           // console.log(authorization)
-        try {
-            decoded = jwt.decode(authorization, config.jwtSecret, true);
-        } catch (e) {
-            return res.status(401).send(e.message);
-        }
-        
-       
-        req.user={
-            id:decoded.payload,
-            isSeller:decoded.isSeller,
-            email:decoded.sub,
+        let token = req.headers.authorization.split(' ');
+        if (token && token.length > 0 && token[0] === 'Bearer') {
+            var authorization = token[1],
+                decoded;
+            // console.log(authorization)
 
-        }        
+            try {
+                decoded = jwt.decode(authorization, config.jwtSecret, true);
+            } catch (e) {
+                return res.status(401).send(e.message);
+            }
+
+
+            req.user = {
+                id:decoded.payload,
+                role:decoded.role,
+                // id: "459874815",
+                // role: "seller",
+                email: decoded.sub,
+            }
         }
-    next();
+        next();
+    }else{
+        res.status(401).send({message:"Authorization token missing."});
+    }
+    
 }
-    //==================================APPLY-MIDDLEWARE==============================================
+
+//==================================APPLY-MIDDLEWARE==============================================
 
 // app.use(jwtDecode)
 app.use(cors())
 app.use(express.json())
-app.use(express.urlencoded())
+app.use(express.urlencoded({extended:true}))
+app.use(express.static('uploads'))
 
 
 //==================================DEFINE-ROUTES==============================================
 
 app.get("/",controller.ping);
-app.post("/category/create",jwtDecode,uploadMiddelware, controller.createCategory);
-app.post("/category/delete",jwtDecode, controller.deleteCategory);
-app.post("/category/update",jwtDecode, controller.updateCategory);
-app.get("/api/category/getcategory", controller.getCategories);
-app.post("/product/create",jwtDecode,uploadMiddelware,controller.createProduct);
-app.get("/products/:slug", controller.getProductBySlug);
+app.get("/products/:slug", controller.getProductsBySlug);
+app.get("/product/:code", controller.getProductByCode);
+app.get("/products",controller.getAllProducts)
+app.get("/categories",controller.getRootCategories);
+// app.get("/api/category/getcategory", controller.getCategories);
+
+app.post("/category/create",jwtDecode,categoryImgUpload, controller.createCategory);
+app.post("/category/banner/:slug", jwtDecode,bannerImgUpload, controller.addBanner);
+app.post("/product/update",jwtDecode,productImgUpload,controller.updateProduct);
+app.post("/category/update/",jwtDecode,categoryImgUpload, controller.updateCategory);
+app.post("/product/create",jwtDecode,productImgUpload,controller.createProduct);
+app.post("/product/image/add/:code",jwtDecode,productImgUpload,controller.addProductImg);
+
+app.delete("/product/image/delete/:code",jwtDecode,controller.deleteProductImg);
+app.delete("/category/delete/:slug",jwtDecode, controller.deleteCategory);
+app.delete("/product/delete/:code",jwtDecode, controller.deleteProduct);
+app.post("/test",controller.test)
 
 
 //==================================SERVER-START===============================================
 let port = config.server.port;
-mongoose.connect(config.db.uri,
+mongoose.connect(config.db.uriTest,
     { 
         useNewUrlParser: true,
         useUnifiedTopology: true,

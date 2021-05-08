@@ -1,53 +1,93 @@
-const mongoose= require('mongoose');
-const productSchema = new mongoose.Schema({
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-    productId:{
-        type:String,
-        required:true,
-        unique:true
+const productSchema = Schema({
+    productCode: {
+        type: String,
+        required: true,
+        unique: true,
     },
-    name:{
-        type:String,
-        required:true,
-        trim:true
+    title: {
+        type: String,
+        required: true
     },
-    slug:{
-        type:String,
-        required:true,
-        unique:true
-    },
-    description:{
-        type:String,
-        required:true,
-        trim:true
-    },
-    quantity:{
-        type:Number,
-        min:0,
-        default:0
-    },
-    price:{
-        type:Number,
-        required:true,
-        min:0
-    },
-    offerId:{
-        type:String
-    },
-    productPictures:[
-        {img:{type:String}}
+    imgs: [
+        {
+            type: String,
+            required: true,
+        }
     ],
-    category:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Category'
+    shortDescription: {
+        type: String,
+        required: true,
     },
-    sellerId:{
-        type:String,
+    mrp:{
+        type:Number,
         required:true
     },
-    inStock:{
-        type:Number
-    }
+    offer:{
+        type:Number,
+        min:0,
+        max:100
+    },
+    price: {
+        type: Number,
+        required: true,
+    },
+    avgRating: {
+        type: Number,
+        default:0
+    },
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+    },
+    feature: {
+        brand: {
+            type: String
+        },
+        color: {
+            type: String
+        },
+        material:{
+            type:String
+        },
+        suitedFor:{
+            type:String
+        }
+    },
+    sizes: [
+        {
+            value: {
+                type: String,
+                required: true
+            },
+            stock: {
+                type: Number,
+                required: true,
+                min: 0
+            }
+        }
+    ],
+    manufacturer: {
+        
+            sellerId:{
+                type:String,
+                required:true
+            },
+            companyName:{
+                type:String,
+                required:true
+            }
+    },
+    available: {
+        type: Boolean,
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
 });
 
-module.exports= mongoose.model('Product', productSchema, "product");
+module.exports = mongoose.model("Product", productSchema, "ProductCopy");

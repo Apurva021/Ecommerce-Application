@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,11 +36,37 @@ public class BookmarkController {
 		return idInteger.equals(userIdInteger);
 	}
 	
-	@GetMapping("/{userIdInteger}")
-	public List<Product> getProductsByUserId(HttpServletRequest request, @PathVariable Integer userIdInteger) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access Denied to sensitive resource");
+	public String getJwtToken(HttpServletRequest request) {
+		Cookie cookies[] = request.getCookies();
+		for(Cookie cookie: cookies) {
+			if(cookie.getName().equals("authCookie")) {
+				return cookie.getValue();
+			}
 		}
+		
+		return "";
+	}
+	
+	@GetMapping("/bookmarks-size")
+	public Integer getBookmarkSize(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
+		Bookmark bookmark = bookmarkRepository.findByUserIdInteger(userIdInteger);
+		if(bookmark == null) {
+			return 0;
+		}
+		else {
+			return bookmark.getProductIdSet().size();
+		}
+	}
+	
+	@GetMapping("/bookmarks")
+	public List<Product> getProductsByUserId(HttpServletRequest request, HttpServletResponse response) throws Exception{
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		List<Product> products = new ArrayList<>();
 		Bookmark bookmark = bookmarkRepository.findByUserIdInteger(userIdInteger);
 		if(bookmark == null) {
@@ -49,7 +77,7 @@ public class BookmarkController {
 		}
 		else {
 			for(String productId: bookmark.getProductIdSet()) {
-				products.add(restTemplate.getForObject("http://productcatalog/product" + productId, Product.class));
+				products.add(restTemplate.getForObject("http://inventoryservice/product/" + productId, Product.class));
 			}
 		}
 		return products;
@@ -63,11 +91,12 @@ public class BookmarkController {
 	 * @return
 	 * @throws Exception
 	 */
-	@GetMapping("/{userIdInteger}/{productId}")
-	public boolean getProductById(HttpServletRequest request, @PathVariable Integer userIdInteger, @PathVariable String productId) throws Exception {
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access Denied to sensitive resource");
-		}
+	@GetMapping("/bookmarks/{productId}")
+	public boolean getProductById(HttpServletRequest request, @PathVariable String productId, HttpServletResponse response) throws Exception {
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		Bookmark bookmark = bookmarkRepository.findByUserIdInteger(userIdInteger);
 		if(bookmark == null) {
 			bookmark = new Bookmark();
@@ -82,11 +111,12 @@ public class BookmarkController {
 		
 	}
 	
-	@PostMapping("/{userIdInteger}/{productId}")
-	public String addProductById(HttpServletRequest request, @PathVariable Integer userIdInteger, @PathVariable String productId) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access Denied to sensitive resource");
-		}
+	@GetMapping("/add-to-bookmarks/{productId}")
+	public String addProductById(HttpServletRequest request, @PathVariable String productId, HttpServletResponse response) throws Exception{
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		Bookmark bookmark = bookmarkRepository.findByUserIdInteger(userIdInteger);
 		if(bookmark == null) {
 			bookmark = new Bookmark();
@@ -97,14 +127,17 @@ public class BookmarkController {
 		bookmark.getProductIdSet().add(productId);
 		bookmarkRepository.save(bookmark);
 		
+		response.sendRedirect("http://localhost:8081/api/user/my-wishlist");
+		
 		return "Product added to bookmarks!";
 	}
 	
-	@DeleteMapping("/{userIdInteger}/{productId}")
-	public String deleteProductById(HttpServletRequest request, @PathVariable Integer userIdInteger, @PathVariable String productId) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access Denied to sensitive resource");
-		}
+	@DeleteMapping("/remove-from-bookmarks/{productId}")
+	public String deleteProductById(HttpServletRequest request, @PathVariable String productId, HttpServletResponse response) throws Exception{
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		
 		Bookmark bookmark = bookmarkRepository.findByUserIdInteger(userIdInteger);
 		if(bookmark == null) {
 			bookmark = new Bookmark();
@@ -116,6 +149,8 @@ public class BookmarkController {
 		else {
 			bookmark.getProductIdSet().remove(productId);
 		}
+		
+		response.sendRedirect("http://localhost:8081/api/user/my-wishlist");
 		
 		return "product removed from bookmarks!";
 	}

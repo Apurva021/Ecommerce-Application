@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,19 @@ public class CartController {
 		return "";
 	}
 	
+	@GetMapping("get-cart-size")
+	public Integer getCartSize(HttpServletRequest request) throws Exception{
+		
+		String jwtString = getJwtToken(request);
+		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
+		Cart cart = cartRepository.findByUserIdInteger(userIdInteger);
+		if(cart == null) {
+			return 0;
+		}
+		
+		return cart.getProductMap().size();
+	}
+	
 	@GetMapping("/get-cart")
 	public List<Product> getProductsByUserId(HttpServletRequest request ) throws Exception{
 		
@@ -75,11 +89,11 @@ public class CartController {
 				products.add(tempProducts[0]);
 				*/
 				System.out.println("productCode:" + productId);
-				Product product = restTemplate.getForObject("http://inventory-service/product/"+productId, Product.class);
+				Product product = restTemplate.getForObject("http://inventoryservice/product/"+productId, Product.class);
 				
 				Integer quantityBought = cart.getProductMap().get(productCompositeId);
 				
-				Available available =  restTemplate.getForObject("http://inventory-service/available?productCode=" + productId + "&size=" + sizeString +"&qty=" + quantityBought , Available.class);
+				Available available =  restTemplate.getForObject("http://inventoryservice/available?productCode=" + productId + "&size=" + sizeString +"&qty=" + quantityBought , Available.class);
 				
 				product.setIsAvailable(available.isAvailable());
 				product.setQuantityBought(quantityBought);
@@ -103,7 +117,7 @@ public class CartController {
 	 * @throws Exception
 	 */
 	@GetMapping("/add-to-cart/{productId}/{sizeString}")
-	public String addProductById(HttpServletRequest request, @PathVariable String productId, @PathVariable String sizeString) throws Exception {
+	public String addProductById(HttpServletRequest request, @PathVariable String productId, @PathVariable String sizeString, HttpServletResponse response) throws Exception {
 		
 		
 		
@@ -129,7 +143,7 @@ public class CartController {
 		cart.getProductMap().put(productId, prevQuantity + 1);
 		
 		cartRepository.save(cart);
-		
+		response.sendRedirect("http://localhost:8081/api/user/my-cart?operation=added");
 		return "Added product to cart";
 	}
 	
@@ -141,7 +155,7 @@ public class CartController {
 	 * @throws Exception
 	 */
 	@PutMapping("/remove-one-from-cart/{productId}/{sizeString}")
-	public String removeProductById(HttpServletRequest request , @PathVariable String productId, @PathVariable String sizeString) throws Exception{
+	public String removeProductById(HttpServletRequest request , @PathVariable String productId, @PathVariable String sizeString, HttpServletResponse response) throws Exception{
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
@@ -164,7 +178,7 @@ public class CartController {
 			
 			cartRepository.save(cart);
 		}
-		
+		response.sendRedirect("http://localhost:8081/api/user/my-cart?operation=removeOne");
 		return "Product Quantity reduced by 1";
 	}
 	
@@ -176,7 +190,7 @@ public class CartController {
 	 * @throws Exception
 	 */
 	@DeleteMapping("/remove-all-from-cart/{productId}/{sizeString}")
-	public String deleteProductById(HttpServletRequest request , @PathVariable String productId, @PathVariable String sizeString) throws Exception {
+	public String deleteProductById(HttpServletRequest request , @PathVariable String productId, @PathVariable String sizeString, HttpServletResponse response) throws Exception {
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
@@ -193,6 +207,7 @@ public class CartController {
 		
 		cart.getProductMap().remove(productId);
 		cartRepository.save(cart);
+		response.sendRedirect("http://localhost:8081/api/user/my-cart?operation=removeAll");
 		return "Product removed from cart";
 	}
 	
@@ -205,7 +220,7 @@ public class CartController {
 	 */
 	
 	@GetMapping("/checkout")
-	public String checkooutCart(@RequestParam Integer addressId ,HttpServletRequest request) throws Exception {
+	public String checkooutCart(@RequestParam Integer addressId ,HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		
 		String jwtString = getJwtToken(request);
@@ -275,7 +290,7 @@ public class CartController {
 			}
 			
 			
-			deleteProductById(request, product.getProductCode(), product.getSizeString());
+			deleteProductById(request, product.getProductCode(), product.getSizeString(), response);
 			
 		}
 		

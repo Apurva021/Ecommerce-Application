@@ -1,5 +1,6 @@
 package com.majorproject.userservicev1;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.Cookie;
@@ -68,14 +69,25 @@ public class AddressController {
 	 * @throws Exception
 	 */
 	@GetMapping("/addresses")
-	public ListAddresses getAddresses(HttpServletRequest request) throws Exception{
+	public List<AddressResponse> getAddresses(HttpServletRequest request) throws Exception{
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
-		ListAddresses listAddresses = new ListAddresses();
-		listAddresses.setAddresses(addressRepository.findAddressByUserUserIdInteger(userIdInteger));
-		return listAddresses;
+		List<AddressResponse> addressResponses = new ArrayList<>();
+		
+		for(Address address : addressRepository.findAddressByUserUserIdInteger(userIdInteger)) {
+			AddressResponse addressResponse = new AddressResponse();
+			addressResponse.setAddressIdInteger(address.getAddressIdInteger());
+			addressResponse.setCityNameString(address.getCityNameString());
+			addressResponse.setFirstLineString(address.getFirstLineString());
+			addressResponse.setSecondLineString(address.getSecondLineString());
+			addressResponse.setThirdLineString(address.getThirdLineString());
+			addressResponse.setPincodeString(address.getPincodeString());
+			addressResponses.add(addressResponse);
+		}
+		
+		return addressResponses;
 	}
 	
 	/**

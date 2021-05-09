@@ -140,7 +140,7 @@ exports.getProductByCode = async(req,res) =>{
   let code = req.params.code;
   let product = await Product.findOne({productCode:code}).populate("category").catch(e=>{console.log(e); res.send(500)});
   if(product){
-    res.json({status:200,product});
+    res.json(product);
   }else{
     res.json({status:404, product:null});
   }

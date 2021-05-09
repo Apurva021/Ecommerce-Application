@@ -142,7 +142,7 @@ exports.getProductByCode = async(req,res) =>{
   if(product){
     res.json(product);
   }else{
-    res.json({status:404, product:null});
+    res.send(404);
   }
 }
 

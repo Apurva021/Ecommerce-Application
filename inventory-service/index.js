@@ -87,7 +87,7 @@ app.post("/test",controller.test)
 
 //==================================SERVER-START===============================================
 let port = config.server.port;
-mongoose.connect(config.db.uriTest,
+mongoose.connect(config.db.uri,
     { 
         useNewUrlParser: true,
         useUnifiedTopology: true,

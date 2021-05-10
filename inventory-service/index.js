@@ -67,7 +67,7 @@ app.get("/products/:slug", controller.getProductsBySlug);
 app.get("/product/:code", controller.getProductByCode);
 app.get("/products",controller.getAllProducts)
 app.get("/categories",controller.getRootCategories);
-
+app.get("/latest/products", controller.getLatestProducts);
 
 // app.get("/api/category/getcategory", controller.getCategories);
 app.get("/seller/products/:sid", jwtDecode,controller.getProductsBySellerId);

@@ -56,6 +56,17 @@ exports.getProductsBySellerId = async (req, res)=>{
   }
 }
 
+// ======================= GET Latest Products ================================================
+exports.getLatestProducts = async(req,res)=>{
+
+ 
+  let products  = await Product.find({})
+                              .populate("category")
+                              .sort("-createdAt")
+                              .limit(10)
+  res.json(products);
+}
+
 // ======================= GET ALL ================================================
 exports.getAllProducts = async(req,res)=>{
 

@@ -75,10 +75,8 @@ public class OrderController {
 	}
 	
 	@PutMapping("/update/{orderIdInteger}")
-	public String updateOrderById(HttpServletRequest request,@RequestBody Order order, @PathVariable Integer userIdInteger) throws Exception{
-		if(!canAccess(request, userIdInteger)) {
-			throw new Exception("Access denied to sensitive resource!");
-		}
+	public String updateOrderById(HttpServletRequest request,@RequestBody Order order, @PathVariable Integer orderIdInteger) throws Exception{
+		
 		orderRepository.save(order);
 		return "Order updated successfully!";
 	}
@@ -165,10 +163,7 @@ public class OrderController {
 			return "No such order exists";
 		}
 		
-		if(!canAccess(request, order.getUserIdInteger())) {
-			//Access Denied
-			return "Access Denied to sensitive resource";
-		}
+		
 		
 		if(order.getOrderStatus().equalsIgnoreCase("CONFIRMED")) {
 			order.setOrderStatus("CANCELLED");

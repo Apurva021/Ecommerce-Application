@@ -16,9 +16,6 @@ app.use(express.urlencoded());
 
 
 
-
-
-
 // app.get('/', productApi.ping);
 // app.post('/', productApi.ping2);
 app.get('/similar',productApi.getSimilar);
@@ -28,9 +25,9 @@ app.get('/similar',productApi.getSimilar);
 
 
 
-// eurekaClient.start( error => {
-//   console.log(error || "This service registered")
-// });
+eurekaClient.start( error => {
+   console.log(error || "This service registered")
+ });
 
 
 var coll;

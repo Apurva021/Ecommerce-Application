@@ -6,14 +6,10 @@ import java.sql.Date;
 
 public class Order {
 
-	private Integer orderIdInteger;
+private Integer orderIdInteger;
 	
-	enum OrderStatus {
-		CONFIRMED, SHIPPPED, CANCELLED, DELIVERD
-	}
 	
 	private Integer userIdInteger;	//customer-id
-	private Integer sellerIdInteger;
 	private Integer productIdInteger;
 	private Integer addressIdInteger;
 	private Integer quantityBoughtInteger;
@@ -23,31 +19,17 @@ public class Order {
 	
 	private Double billAmountDouble;
 	
-	private OrderStatus orderStatus;
+	private String orderStatusString;
 	
+	private String receiptIdString;
 	
-	public Order() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+	private String sellerId;
 	
-	public Order(Integer orderIdInteger, Integer userIdInteger, Integer sellerIdInteger, Integer productIdInteger,
-			Integer addressIdInteger, Integer quantityBoughtInteger, Date dateOfPurchaseDate, Date dateOfDeliverDate,
-			Double billAmountDouble) {
-		super();
-		this.orderIdInteger = orderIdInteger;
-		this.userIdInteger = userIdInteger;
-		this.sellerIdInteger = sellerIdInteger;
-		this.productIdInteger = productIdInteger;
-		this.addressIdInteger = addressIdInteger;
-		this.quantityBoughtInteger = quantityBoughtInteger;
-		this.dateOfPurchaseDate = dateOfPurchaseDate;
-		this.dateOfDeliverDate = dateOfDeliverDate;
-		this.billAmountDouble = billAmountDouble;
-		this.orderStatus = OrderStatus.CONFIRMED;
-	}
-
-
+	private String sizeString;
+	
+	private String imageLink;
+	
+	private String productTitle;
 
 	public Integer getOrderIdInteger() {
 		return orderIdInteger;
@@ -63,14 +45,6 @@ public class Order {
 
 	public void setUserIdInteger(Integer userIdInteger) {
 		this.userIdInteger = userIdInteger;
-	}
-
-	public Integer getSellerIdInteger() {
-		return sellerIdInteger;
-	}
-
-	public void setSellerIdInteger(Integer sellerIdInteger) {
-		this.sellerIdInteger = sellerIdInteger;
 	}
 
 	public Integer getProductIdInteger() {
@@ -121,11 +95,55 @@ public class Order {
 		this.billAmountDouble = billAmountDouble;
 	}
 
-	public OrderStatus getOrderStatus() {
-		return orderStatus;
+	public String getOrderStatusString() {
+		return orderStatusString;
 	}
 
-	public void setOrderStatus(OrderStatus orderStatus) {
-		this.orderStatus = orderStatus;
+	public void setOrderStatusString(String orderStatusString) {
+		this.orderStatusString = orderStatusString;
 	}
+
+	public String getReceiptIdString() {
+		return receiptIdString;
+	}
+
+	public void setReceiptIdString(String receiptIdString) {
+		this.receiptIdString = receiptIdString;
+	}
+
+	public String getSellerId() {
+		return sellerId;
+	}
+
+	public void setSellerId(String sellerId) {
+		this.sellerId = sellerId;
+	}
+
+	public String getSizeString() {
+		return sizeString;
+	}
+
+	public void setSizeString(String sizeString) {
+		this.sizeString = sizeString;
+	}
+
+	public String getImageLink() {
+		return imageLink;
+	}
+
+	public void setImageLink(String imageLink) {
+		this.imageLink = imageLink;
+	}
+
+	public String getProductTitle() {
+		return productTitle;
+	}
+
+	public void setProductTitle(String productTitle) {
+		this.productTitle = productTitle;
+	}
+	
+	
+	
+	
 }

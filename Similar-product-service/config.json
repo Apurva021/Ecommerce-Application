@@ -35,6 +35,7 @@
               "productCode": 1, 
               "available":1,
               "sizes":1,
+               "avgRating":1,
               "score": {
                 "$meta": "searchScore"
               }

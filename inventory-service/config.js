@@ -28,6 +28,6 @@ module.exports={
         "requestRetryDelay": 10000
       },
       "application":{
-        "name":"Inventory-Service"
+        "name":"InventoryService"
       }
 }

@@ -146,14 +146,12 @@ router.post('/payment',(req,res)=>
 {
 
 
-const amount =req.body.totalBill;
-const receiptId = req.body.receiptId;
-//const email = req.user.email;
-//const mobileNo=req.body.mobileNo;
-//const userId = req.user.id;
-const email = "temp@gmail.com";
-const mobileNo="987654321";
-const userId = "Cust001";
+const amount =req.query.totalBill;
+const receiptId = req.query.receiptId;
+const email = req.query.emailId;
+const mobileNo=req.query.mobileNo;
+const userId = req.query.userId;
+	
     /* import checksum generation utility */
 const totalAmount=JSON.stringify(amount);
 var params = {};

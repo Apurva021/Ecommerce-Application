@@ -146,14 +146,14 @@ router.post('/payment',(req,res)=>
 {
 
 
-const amount =req.query.totalBill;
-const receiptId = req.query.receiptId;
-const email = req.query.emailId;
-const mobileNo=req.query.mobileNo;
-const userId = req.query.userId;
+const amount =req.body.totalBill;
+const receiptId = req.body.receiptId;
+const email = req.body.emailId;
+const mobileNo=req.body.mobileNo;
+const userId = req.body.userId;
 	
     /* import checksum generation utility */
-const totalAmount=JSON.stringify(amount);
+const totalAmount=amount;
 var params = {};
 
 /* initialize an array */
@@ -164,7 +164,7 @@ params['INDUSTRY_TYPE_ID'] = process.env.PAYTM_INDUSTRY_TYPE_ID,
 params['ORDER_ID'] = receiptId,
 params['CUST_ID'] = userId,
 params['TXN_AMOUNT'] = totalAmount,
-params['CALLBACK_URL'] = 'http://localhost:5000/api/callback',
+params['CALLBACK_URL'] = 'http://localhost:5000/callback',
 params['EMAIL'] =email,
 params['MOBILE_NO'] = mobileNo
 

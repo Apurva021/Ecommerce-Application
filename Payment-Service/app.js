@@ -44,7 +44,7 @@ var jwtDecode = (req,res,next)=>{
 app.use(jwtDecode);
 app.use(express.json())
 app.use(cors())
-app.use('/api',paymentRoute);
+app.use('/',paymentRoute);
 
 
 

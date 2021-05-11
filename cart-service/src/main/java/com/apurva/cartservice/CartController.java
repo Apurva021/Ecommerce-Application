@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.JsonObjectDeserializer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+
 
 
 @RestController
@@ -143,6 +145,9 @@ public class CartController {
 		cart.getProductMap().put(productId, prevQuantity + 1);
 		
 		cartRepository.save(cart);
+		
+		
+		
 		response.sendRedirect("http://localhost:8081/api/user/my-cart?operation=added");
 		return "Added product to cart";
 	}
@@ -220,8 +225,9 @@ public class CartController {
 	 */
 	
 	@GetMapping("/checkout")
-	public String checkooutCart(@RequestParam Integer addressId ,HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public PaymentInfo checkooutCart(@RequestParam Integer addressId ,HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
+		System.out.println("THE CHECKOUT ENDPOINT IS CALLED");
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString)); 
@@ -248,6 +254,8 @@ public class CartController {
 		String productTitle;
 		
 		List<Product> productsPurchased = getProductsByUserId(request);
+		
+		Cart cart = cartRepository.findByUserIdInteger(userIdInteger);
 		
 		for(Product product : productsPurchased) {
 			billAmountDouble = product.getPrice();
@@ -289,12 +297,43 @@ public class CartController {
 				throw new Exception("Failed order creation");
 			}
 			
+			//remove the product from cart manually
+			//because calling the function will give redirect error
 			
-			deleteProductById(request, product.getProductCode(), product.getSizeString(), response);
+			String productIdString = product.getProductCode() + "@" + product.getSizeString();
+			if(cart.getProductMap().containsKey(productIdString)) {
+				System.out.println("REMOVED FROM CART:" + productIdString);
+				cart.getProductMap().remove(productIdString);
+			}
+			
+			
+			//deleteProductById(request, product.getProductCode(), product.getSizeString(), response);
 			
 		}
 		
-		return "receiptId: " + receiptIdString + " totalBill:" + totalBillDouble;
+		cartRepository.save(cart);
+		
+		HttpHeaders headers = new HttpHeaders();
+		List<String> cookiesList = new ArrayList<>();
+		cookiesList.add("authCookie="+jwtString);
+		headers.put(HttpHeaders.COOKIE, cookiesList);
+		HttpEntity entity = new HttpEntity(headers);
+		
+		ResponseEntity<User> responseEntity = restTemplate.exchange("http://user-service/user", HttpMethod.GET, entity ,User.class);
+		User user = responseEntity.getBody();
+		String billAmountString = String.format("%.2f", totalBillDouble);
+		
+		PaymentInfo paymentInfo = new PaymentInfo();
+		paymentInfo.setEmailId(user.getEmailString());
+		paymentInfo.setMobileNo(user.getPhoneNumberString());
+		paymentInfo.setReceiptId(receiptIdString);
+		paymentInfo.setTotalBill(billAmountString);
+		paymentInfo.setUserId(userIdInteger.toString());
+		
+		return paymentInfo;
+		//response.sendRedirect("http://localhost:8081/payment-service/payment?totalBill=" + billAmountString + "&receiptId=" + receiptIdString + "&emailId=" + user.getEmailString() + "&mobileNo=" + user.getPhoneNumberString() + "&userId=" + userIdInteger);
+		
+		//return "receiptId: " + receiptIdString + " totalBill:" + totalBillDouble;
 		
 	} 
 	

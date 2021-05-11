@@ -155,7 +155,7 @@ public class OrderController {
 	}
 	
 	@GetMapping("/cancel/{orderId}")
-	public String cancelOrderById(@PathVariable Integer orderId, HttpServletRequest request, HttpServletResponse response) {
+	public String cancelOrderById(@PathVariable Integer orderId, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		Order order = orderRepository.findByOrderIdInteger(orderId);
 		
 		if(order == null) {
@@ -165,7 +165,7 @@ public class OrderController {
 		
 		
 		
-		if(order.getOrderStatus().equalsIgnoreCase("CONFIRMED")) {
+		if(order.getOrderStatus().equalsIgnoreCase("CONFIRMED") || order.getOrderStatus().equalsIgnoreCase("PENDING")) {
 			order.setOrderStatus("CANCELLED");
 			orderRepository.save(order);
 			OrderCancelEvent orderCancelEvent = new OrderCancelEvent();
@@ -173,6 +173,7 @@ public class OrderController {
 			orderCancelEvent.setOrderId(Integer.toString(orderId));
 			
 			orderCancelKafkaTemplate.send("OrderFulfillmentStream", orderCancelEvent);
+			response.sendRedirect("http://localhost:8081/api/user/my-orders");
 			return "Order cancelled! And kafka Message Generated";
 		}
 		else {

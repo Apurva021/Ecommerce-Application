@@ -16,10 +16,24 @@ public class Product {
 	private Double avgRating;
 	private Sizes sizes[];
 	private Category category;
+	private Double mrp;
+	private Double offer;
 	
 	
 	
 	
+	public Double getMrp() {
+		return mrp;
+	}
+	public void setMrp(Double mrp) {
+		this.mrp = mrp;
+	}
+	public Double getOffer() {
+		return offer;
+	}
+	public void setOffer(Double offer) {
+		this.offer = offer;
+	}
 	public Category getCategory() {
 		return category;
 	}

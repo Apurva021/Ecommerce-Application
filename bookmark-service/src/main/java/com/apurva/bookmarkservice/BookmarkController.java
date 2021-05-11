@@ -77,6 +77,7 @@ public class BookmarkController {
 		}
 		else {
 			for(String productId: bookmark.getProductIdSet()) {
+				System.out.println("PRODUCT ID IN BOOKMARK:"+ productId);
 				products.add(restTemplate.getForObject("http://inventoryservice/product/" + productId, Product.class));
 			}
 		}
@@ -132,7 +133,7 @@ public class BookmarkController {
 		return "Product added to bookmarks!";
 	}
 	
-	@DeleteMapping("/remove-from-bookmarks/{productId}")
+	@GetMapping("/remove-from-bookmarks/{productId}")
 	public String deleteProductById(HttpServletRequest request, @PathVariable String productId, HttpServletResponse response) throws Exception{
 		
 		String jwtString = getJwtToken(request);
@@ -148,6 +149,7 @@ public class BookmarkController {
 		}
 		else {
 			bookmark.getProductIdSet().remove(productId);
+			bookmarkRepository.save(bookmark);
 		}
 		
 		response.sendRedirect("http://localhost:8081/api/user/my-wishlist");

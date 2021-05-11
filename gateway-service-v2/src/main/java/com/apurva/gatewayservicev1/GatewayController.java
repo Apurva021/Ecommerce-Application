@@ -114,6 +114,11 @@ public class GatewayController {
 	}
 	*/
 	
+	@GetMapping("/")
+	public String getHomePage(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		return "redirect:http://localhost:8081/api";
+	}
+	
 	@PostMapping(path = "/signup")
 	public void registerUser(@ModelAttribute SignUpRequest signUpRequest, Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
@@ -240,7 +245,7 @@ public class GatewayController {
 		
 		response.sendRedirect("/hello");
 		
-		return "hello";
+		return "redirect:http://localhost:8081/api";
 		
 	}
 	
@@ -326,7 +331,7 @@ public class GatewayController {
 		cookie.setMaxAge(0);
 		cookie.setPath("/");
 		response.addCookie(cookie);
-		return "signout";
+		return "redirect:http://localhost:8081/api";
 	}
 	
 	@PostMapping("/signout")

@@ -95,7 +95,7 @@ public class CartController {
 				
 				Available available =  restTemplate.getForObject("http://inventoryservice/available?productCode=" + productId + "&size=" + sizeString +"&qty=" + quantityBought , Available.class);
 				
-				product.setIsAvailable(available.isAvailable());
+				product.setAvailable(available.isAvailable());
 				product.setQuantityBought(quantityBought);
 				//product.setShortDescription(object.shortDescription);
 				product.setSizeString(sizeString);
@@ -154,7 +154,7 @@ public class CartController {
 	 * @return
 	 * @throws Exception
 	 */
-	@PutMapping("/remove-one-from-cart/{productId}/{sizeString}")
+	@GetMapping("/remove-one-from-cart/{productId}/{sizeString}")
 	public String removeProductById(HttpServletRequest request , @PathVariable String productId, @PathVariable String sizeString, HttpServletResponse response) throws Exception{
 		
 		String jwtString = getJwtToken(request);
@@ -189,7 +189,7 @@ public class CartController {
 	 * @return
 	 * @throws Exception
 	 */
-	@DeleteMapping("/remove-all-from-cart/{productId}/{sizeString}")
+	@GetMapping("/remove-all-from-cart/{productId}/{sizeString}")
 	public String deleteProductById(HttpServletRequest request , @PathVariable String productId, @PathVariable String sizeString, HttpServletResponse response) throws Exception {
 		
 		String jwtString = getJwtToken(request);

@@ -144,26 +144,26 @@ public class GatewayController {
 		user.setRole("user");
 		user.setEnabled(false);
 		userRepository.save(user);
-		
+		kafkaController.signUpNotification(user);
 		response.sendRedirect("/api/user/authenticate?verify=email");
 		
 	}
 	
 	@GetMapping("/confirm-account")
-	public String confirmAccount(HttpServletRequest request, @RequestParam String confirmationToken) {
+	public String confirmAccount(HttpServletRequest request, @RequestParam String confirmationToken, HttpServletResponse response) throws Exception {
 		User user = userRepository.findByConfirmationTokenString(confirmationToken);
 		
 		if(user == null) {
-			return "Invalid Confirmation Token";
+			return "redirect:http://localhost:8081/api/user/authenticate";
 		}
 		
 		if(user.isEnabled()) {
-			return "Email already Verified!";
+			return "redirect:http://localhost:8081/api/user/authenticate";
 		}
 		
 		user.setEnabled(true);
 		userRepository.save(user);
-		return "Email Verified";
+		return "redirect:http://localhost:8081/api/user/authenticate";
 	}
 	
 	@GetMapping("/login")
@@ -243,7 +243,6 @@ public class GatewayController {
 		cookie.setPath("/");
 		response.addCookie(cookie);
 		
-		response.sendRedirect("/hello");
 		
 		return "redirect:http://localhost:8081/api";
 		
@@ -301,11 +300,14 @@ public class GatewayController {
 		return "redirect:http://localhost:8081/api/user/change-password?password=changed";
 	}
 	
-	@GetMapping("/forgot-password/{userEmailId}")
-	public String forgotPassword(HttpServletRequest request ,@PathVariable String userEmailId) throws Exception {
+	@PostMapping("/forgot-password")
+	public String forgotPassword(@ModelAttribute ForgotPasswordRequest forgotPasswordRequest, Model model ,HttpServletRequest request , HttpServletResponse response) throws Exception {
+		model.addAttribute("forgotPasswordRequest", forgotPasswordRequest);
+		String userEmailId = forgotPasswordRequest.getEmailString();
+		
 		User user = userRepository.findByEmailString(userEmailId);
 		if(user == null) {
-			throw new Exception("No such email registered!");
+			return "redirect:http://localhost:8081/api/user/forgot-password?email=notFound";
 		}
 		
 		StringBuilder newPasswordBuilder = new StringBuilder();
@@ -320,7 +322,9 @@ public class GatewayController {
 		user.setPasswordString(bCryptPasswordEncoder.encode(newPasswordBuilder.toString()));
 		userRepository.save(user);
 		
-		return kafkaController.forgotPassword(user, newPasswordBuilder.toString());
+		kafkaController.forgotPassword(user, newPasswordBuilder.toString());
+		
+		return "redirect:http://localhost:8081/api/user/forgot-password?email=changed";
 		
 	
 	}

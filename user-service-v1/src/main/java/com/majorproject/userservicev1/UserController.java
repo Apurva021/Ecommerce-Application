@@ -4,10 +4,14 @@ import java.util.Optional;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -58,15 +62,17 @@ public class UserController {
 	}
 	
 	@PostMapping("/become-seller")
-	public String becomeSeller(HttpServletRequest request, @RequestBody BecomeSellerRequest becomeSellerRequest) throws Exception{
+	public String becomeSeller(HttpServletRequest request, @ModelAttribute BecomeSellerRequest becomeSellerRequest, Model model, HttpServletResponse response ) throws Exception{
+		
+		model.addAttribute("becomeSellerRequest", becomeSellerRequest);
 		
 		String jwtString = getJwtToken(request);
 		Integer userIdInteger = Integer.parseInt(jwtUtil.getPayload(jwtString));
 		
-		String emailString = jwtUtil.extractUsername(request.getHeader("Authorization").substring(7));
+		String emailString = jwtUtil.extractUsername(jwtString);
 		User user = userRepository.findByEmailString(emailString);
 		if(user.getRole().equals("seller")) {
-			throw new Exception("You are already a seller!");
+			return "redirect:http://localhost:8081/api/user/become-seller";
 		}
 		user.setRole("seller");
 		userRepository.save(user);
@@ -76,7 +82,8 @@ public class UserController {
 		seller.setUser(user);
 		sellerRepository.save(seller);
 		
-		return "Now you can sell products!";
+		response.sendRedirect("http://localhost:8081/api/user/become-seller?seller=became");
+		return "redirect:http://localhost:8081/api/user/become-seller?seller=bacame";
 	}
 	
 	@GetMapping("/temp/{userId}")

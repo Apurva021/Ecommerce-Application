@@ -4,6 +4,9 @@ This repository contains the backend code for the microservices we have created 
 # Service Architecture
 <img src="/docs/service_architecture.jpg" alt="Service Architecture Diagram"/>
 
+# Use Case Diagram
+<img src="/docs/UseCaseDiagram.jpg" alt="Use Case Diagram"/>
+
 ## Features
 * Registration/Login
 * Create and Edit User profile
